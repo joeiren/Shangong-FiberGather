@@ -28,8 +28,6 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             _gPane.Chart.Fill = new Fill(Color.Black);
 
             _gPane.LineType = LineType.Stack;
-            //            this.zedGraphControl1.GraphPane.YAxis.MinorGrid.IsVisible = true;
-            //            this.zedGraphControl1.GraphPane.YAxis.MinorGrid.Color = Color.Red;
             _gPane.XAxis.Scale.FontSpec.Size = 10;
             _gPane.XAxis.Scale.Max = 100;
             _gPane.XAxis.Scale.Min = 1;
@@ -37,12 +35,14 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             _gPane.XAxis.Title.Text = "时间";
             _gPane.XAxis.Title.FontSpec.FontColor = Color.Blue;
 
-            _gPane.YAxis.Scale.FontSpec.Size = 10;
+            _gPane.YAxis.Scale.FontSpec.Size = 12;
 
             _gPane.YAxis.MajorGrid.IsVisible = true;
             _gPane.YAxis.MajorGrid.Color = Color.White;
             _gPane.YAxis.IsVisible = true;
             _gPane.YAxis.Scale.IsVisible = true;
+            _gPane.YAxis.Title.Text = "波长";
+            _gPane.YAxis.Title.FontSpec.FontColor = Color.Blue;
 
 //            zedGraphControl1.IsShowPointValues = true;
 //            zedGraphControl1.PointValueEvent += new ZedGraphControl.PointValueHandler(MyPointValueHandler);
