@@ -3,6 +3,7 @@ syntax: glob
 *.bak.*
 *.bak
 thumbs.db
+*.sln.DotSettings
 
 #-- Directories
 App_Data/*
