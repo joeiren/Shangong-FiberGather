@@ -15,35 +15,38 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
 
         private PointPairList _pointList;
         private double _minY = double.MaxValue;
-        private double _maxY =double.MinValue;
+        private double _maxY = double.MinValue;
         private void InitWaveControl()
         {
             _gPane = zedGraphControl1.GraphPane;
             _pointList = new PointPairList();
-            XDate start = new XDate();
             LineItem myCurve;
             myCurve = zedGraphControl1.GraphPane.AddCurve("My Curve", _pointList, Color.Lime, SymbolType.None);
             myCurve.Line.Width = 1.2F;
+            myCurve.Line.IsSmooth = true;
+
+            _gPane.Chart.Fill = new Fill(Color.Black);
+
             _gPane.LineType = LineType.Stack;
             //            this.zedGraphControl1.GraphPane.YAxis.MinorGrid.IsVisible = true;
             //            this.zedGraphControl1.GraphPane.YAxis.MinorGrid.Color = Color.Red;
             _gPane.XAxis.Scale.FontSpec.Size = 10;
+            _gPane.XAxis.Scale.Max = 100;
+            _gPane.XAxis.Scale.Min = 1;
+            _gPane.XAxis.Scale.IsVisible = false;
+            _gPane.XAxis.Title.Text = "时间";
+            _gPane.XAxis.Title.FontSpec.FontColor = Color.Blue;
+
             _gPane.YAxis.Scale.FontSpec.Size = 10;
-            //_gPane.YAxis.Scale.MinAuto = true;
-            //_gPane.YAxis.Scale.MaxAuto = true;
-       
-  
-            _gPane.XAxis.Type = AxisType.DateAsOrdinal;
-            _gPane.Chart.Fill = new Fill(Color.Black);
-            //            this.zedGraphControl1.GraphPane.XAxis.MajorGrid.IsVisible = true;
-            //            this.zedGraphControl1.GraphPane.XAxis.MajorGrid.Color = Color.WhiteSmoke;
+
             _gPane.YAxis.MajorGrid.IsVisible = true;
             _gPane.YAxis.MajorGrid.Color = Color.White;
+            _gPane.YAxis.IsVisible = true;
+            _gPane.YAxis.Scale.IsVisible = true;
 
-            zedGraphControl1.IsShowPointValues = true;
+//            zedGraphControl1.IsShowPointValues = true;
+//            zedGraphControl1.PointValueEvent += new ZedGraphControl.PointValueHandler(MyPointValueHandler);
 
-            zedGraphControl1.PointValueEvent += new ZedGraphControl.PointValueHandler(MyPointValueHandler);
-            zedGraphControl1.IsAutoScrollRange = true;
             zedGraphControl1.IsEnableSelection = false;
             zedGraphControl1.IsShowContextMenu = false;
             
@@ -61,11 +64,11 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
 
         protected void ShowWaveForm()
         {
+    
             //ControlRenderInvoke.SafeInvoke(zedGraphControl1, () =>
             {
                 _pointList.Clear();
-                var list = _waveViewData.DisplayChannelWaveQueue.ToList();
-                //_waveViewData.TakeMoreChannelWaveData(10);
+               /* var list = _waveViewData.DisplayChannelWaveQueue.ToList();
                 XDate start = new XDate();
                 for (var i = 0; i < list.Count; i++)
                 {
@@ -78,19 +81,52 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                     _minY = Math.Min(val, _minY);
                     _maxY = Math.Max(val, _maxY);
                     _pointList.Add(start, val);
-                }
+                }*/
 
-                _gPane.YAxis.Scale.Max = _maxY + 0.005;
-                _gPane.YAxis.Scale.Min = _minY - 0.005;
-                _gPane.YAxis.Scale.MajorStep = 0.001;
+                PointListMock();
+                _gPane.YAxis.Scale.Max = _maxY + 0.05;
+                _gPane.YAxis.Scale.Min = _minY - 0.05;
+                _gPane.YAxis.Scale.MajorStep = 0.05;
+                
+         
                 zedGraphControl1.GraphPane.CurveList.Clear();
-                var line = zedGraphControl1.GraphPane.AddCurve("My Curve", _pointList, Color.Lime, SymbolType.None);
+                var line = zedGraphControl1.GraphPane.AddCurve("波长变化图", _pointList, Color.Lime, SymbolType.None);
                 line.Line.IsSmooth = true;
                 this.zedGraphControl1.AxisChange();
 
                 this.zedGraphControl1.Refresh();
             }
             //);
+        }
+
+        private static Queue<double> _listMock = new Queue<double>(); 
+
+        public static List<double> _listRange = new List<double>()
+        {
+            1538.0199,1537.9199,1538.0299,1537.9542,1538.1085
+        };
+        static Random random = new Random();
+        protected static void LoopPlusTestMock()
+        {
+            while (_listMock.Count >= 100)
+            {
+                _listMock.Dequeue();
+            }
+            
+            double val = _listRange.ElementAt(random.Next() % 5);
+            _listMock.Enqueue(val);
+        }
+
+        protected  void PointListMock()
+        {
+            LoopPlusTestMock();
+            for (var i = 0; i < _listMock.Count; i++)
+            {
+                var val = _listMock.ElementAt(i);
+                _minY = Math.Min(val, _minY);
+                _maxY = Math.Max(val, _maxY);
+                _pointList.Add(i, val);
+            }
         }
     }
 }
