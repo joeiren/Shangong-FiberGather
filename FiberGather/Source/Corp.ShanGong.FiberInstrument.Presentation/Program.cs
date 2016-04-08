@@ -14,8 +14,8 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AppSetting.Container = BootStrap.CreateProjectContainer();
-            Application.Run(new MainForm());
-            //Application.Run(new FiberMainForm());
+            //Application.Run(new MainForm());
+            Application.Run(new FiberMainForm());
         }
     }
 }
