@@ -71,7 +71,7 @@
             this.tabPageWave = new System.Windows.Forms.TabPage();
             this.tabPageWaveChart = new System.Windows.Forms.TabPage();
             this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+//            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBoxSetting.SuspendLayout();
             this.groupBoxSave.SuspendLayout();
             this.tabControlMonitor.SuspendLayout();
@@ -83,27 +83,27 @@
             // 
             this.listViewQuantity.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewQuantity.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1});
+//            this.listViewQuantity.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+//            this.columnHeader1});
             this.listViewQuantity.GridLines = true;
             this.listViewQuantity.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewQuantity.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem1,
-            listViewItem2,
-            listViewItem3,
-            listViewItem4,
-            listViewItem5,
-            listViewItem6,
-            listViewItem7,
-            listViewItem8,
-            listViewItem9,
-            listViewItem10,
-            listViewItem11,
-            listViewItem12,
-            listViewItem13,
-            listViewItem14,
-            listViewItem15,
-            listViewItem16});
+//            this.listViewQuantity.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
+//            listViewItem1,
+//            listViewItem2,
+//            listViewItem3,
+//            listViewItem4,
+//            listViewItem5,
+//            listViewItem6,
+//            listViewItem7,
+//            listViewItem8,
+//            listViewItem9,
+//            listViewItem10,
+//            listViewItem11,
+//            listViewItem12,
+//            listViewItem13,
+//            listViewItem14,
+//            listViewItem15,
+//            listViewItem16});
             this.listViewQuantity.Location = new System.Drawing.Point(3, 3);
             this.listViewQuantity.Name = "listViewQuantity";
             this.listViewQuantity.Size = new System.Drawing.Size(989, 372);
@@ -397,7 +397,7 @@
             // 
             // columnHeader1
             // 
-            this.columnHeader1.Text = "No.";
+//            this.columnHeader1.Text = "No.";
             // 
             // FiberMainForm
             // 
@@ -461,7 +461,7 @@
         private System.Windows.Forms.TabPage tabPageWave;
         private System.Windows.Forms.TabPage tabPageWaveChart;
         private ZedGraph.ZedGraphControl zedGraphControl1;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
+//        private System.Windows.Forms.ColumnHeader columnHeader1;
 
     }
 }

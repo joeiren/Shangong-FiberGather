@@ -237,6 +237,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                                 for (var i = 0; i < GlobalSetting.Instance.SensorCount; i++)
                                 {
                                     var item = listViewQuantity.Items[i];
+                                    item.SubItems[0].Text = (i + 1).ToString();
                                     for (var j = 0; j < GlobalSetting.Instance.ChannelWay; j++)
                                     {
                                         var text = quan.ChannelValues[j].GratingValues[i].WaveLengthExtension.ToString();
