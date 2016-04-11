@@ -148,13 +148,13 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         private void InitTimer()
         {
             _renderTimer = new Timer();
-            _renderTimer.Interval = 10; // 0.1秒
+            _renderTimer.Interval = 100; // 0.1秒
             _renderTimer.Tick += _renderTimer_Tick;
 
-            _mockTimer = new Timer();
-            _mockTimer.Interval = 50;
-            _mockTimer.Tick +=_mockTimer_Tick;
-            _mockTimer.Start();
+//            _mockTimer = new Timer();
+//            _mockTimer.Interval = 50;
+//            _mockTimer.Tick +=_mockTimer_Tick;
+//            _mockTimer.Start();
         }
 
         private void _mockTimer_Tick(object aSender, EventArgs aE)
@@ -227,7 +227,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                             }
                         });
                     }
-                    ShowWaveForm();
+                    
                     ControlRenderInvoke.SafeInvoke(listViewQuantity, () =>
                     {
                         try

@@ -18,6 +18,8 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         private double _maxY = double.MinValue;
         private void InitWaveControl()
         {
+            tabControlMonitor.TabPages.RemoveAt(1);
+            return;
             _gPane = zedGraphControl1.GraphPane;
             _pointList = new PointPairList();
             LineItem myCurve;
