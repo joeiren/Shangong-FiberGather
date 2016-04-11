@@ -62,7 +62,6 @@
     <Compile Include="AdMessage.cs" />
     <Compile Include="EnumMessageType.cs" />
     <Compile Include="FrequencyAdMessage.cs" />
-    <Compile Include="GlobalSetting.cs" />
     <Compile Include="IMessageParse.cs" />
     <Compile Include="FrequencyMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +73,10 @@
     <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Common\Corp.ShanGong.FiberInstrument.Common.csproj">
       <Project>{ed8e9564-d7a6-4132-8ad7-e094b443c229}</Project>
       <Name>Corp.ShanGong.FiberInstrument.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Setting\Corp.ShanGong.FiberInstrument.Setting.csproj">
+      <Project>{ae3b9264-d797-47f8-a0a7-28cf998094fb}</Project>
+      <Name>Corp.ShanGong.FiberInstrument.Setting</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

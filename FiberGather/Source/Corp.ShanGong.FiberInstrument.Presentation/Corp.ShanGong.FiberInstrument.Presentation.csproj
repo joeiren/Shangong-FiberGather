@@ -58,6 +58,9 @@
   <ItemGroup>
     <Compile Include="AppSetting.cs" />
     <Compile Include="BootStrap.cs" />
+    <Compile Include="ChannelGridViewData.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ControlRenderInvoke.cs" />
     <Compile Include="WaveFormViewData.cs" />
     <Compile Include="FiberMainForm.cs">
@@ -131,6 +134,10 @@
     <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.ProjectSpec\Corp.ShanGong.FiberInstrument.ProjectSpec.csproj">
       <Project>{EF8DCF5F-EE2C-40D7-89F9-236665C6AAEB}</Project>
       <Name>Corp.ShanGong.FiberInstrument.ProjectSpec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Setting\Corp.ShanGong.FiberInstrument.Setting.csproj">
+      <Project>{ae3b9264-d797-47f8-a0a7-28cf998094fb}</Project>
+      <Name>Corp.ShanGong.FiberInstrument.Setting</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

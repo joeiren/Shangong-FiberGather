@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Corp.ShanGong.FiberInstrument.IBizSpec;
 using Corp.ShanGong.FiberInstrument.Model;
+using Corp.ShanGong.FiberInstrument.Setting;
 
 namespace Corp.ShanGong.FiberInstrument.BizCore
 {

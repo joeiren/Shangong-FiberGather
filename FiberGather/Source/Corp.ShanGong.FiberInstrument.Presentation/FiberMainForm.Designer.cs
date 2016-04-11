@@ -30,15 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             this.listViewQuantity = new System.Windows.Forms.ListView();
-            this.columnHeader0 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBoxSetting = new System.Windows.Forms.GroupBox();
             this.textBoxLocalPort = new System.Windows.Forms.TextBox();
             this.labelLocal = new System.Windows.Forms.Label();
@@ -73,17 +64,8 @@
             // 
             // listViewQuantity
             // 
-            this.listViewQuantity.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader0,
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader5,
-            this.columnHeader6,
-            this.columnHeader7,
-            this.columnHeader8});
-            this.listViewQuantity.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewQuantity.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listViewQuantity.GridLines = true;
             this.listViewQuantity.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewQuantity.Location = new System.Drawing.Point(3, 3);
@@ -92,52 +74,6 @@
             this.listViewQuantity.TabIndex = 30;
             this.listViewQuantity.UseCompatibleStateImageBehavior = false;
             this.listViewQuantity.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader0
-            // 
-            this.columnHeader0.Text = "传感器序号";
-            this.columnHeader0.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeader0.Width = 72;
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "CH1";
-            this.columnHeader1.Width = 100;
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "CH2";
-            this.columnHeader2.Width = 100;
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "CH3";
-            this.columnHeader3.Width = 100;
-            // 
-            // columnHeader4
-            // 
-            this.columnHeader4.Text = "CH4";
-            this.columnHeader4.Width = 100;
-            // 
-            // columnHeader5
-            // 
-            this.columnHeader5.Text = "CH5";
-            this.columnHeader5.Width = 100;
-            // 
-            // columnHeader6
-            // 
-            this.columnHeader6.Text = "CH6";
-            this.columnHeader6.Width = 100;
-            // 
-            // columnHeader7
-            // 
-            this.columnHeader7.Text = "CH7";
-            this.columnHeader7.Width = 100;
-            // 
-            // columnHeader8
-            // 
-            this.columnHeader8.Text = "CH8";
-            this.columnHeader8.Width = 100;
             // 
             // groupBoxSetting
             // 
@@ -403,7 +339,7 @@
             this.tabPageWaveChart.Location = new System.Drawing.Point(4, 22);
             this.tabPageWaveChart.Name = "tabPageWaveChart";
             this.tabPageWaveChart.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWaveChart.Size = new System.Drawing.Size(995, 397);
+            this.tabPageWaveChart.Size = new System.Drawing.Size(995, 378);
             this.tabPageWaveChart.TabIndex = 1;
             this.tabPageWaveChart.Text = "波长图";
             this.tabPageWaveChart.UseVisualStyleBackColor = true;
@@ -451,15 +387,15 @@
         #endregion
 
         private System.Windows.Forms.ListView listViewQuantity;
-        private System.Windows.Forms.ColumnHeader columnHeader0;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader3;
-        private System.Windows.Forms.ColumnHeader columnHeader4;
-        private System.Windows.Forms.ColumnHeader columnHeader5;
-        private System.Windows.Forms.ColumnHeader columnHeader6;
-        private System.Windows.Forms.ColumnHeader columnHeader7;
-        private System.Windows.Forms.ColumnHeader columnHeader8;
+//        private System.Windows.Forms.ColumnHeader columnHeader0;
+//        private System.Windows.Forms.ColumnHeader columnHeader1;
+//        private System.Windows.Forms.ColumnHeader columnHeader2;
+//        private System.Windows.Forms.ColumnHeader columnHeader3;
+//        private System.Windows.Forms.ColumnHeader columnHeader4;
+//        private System.Windows.Forms.ColumnHeader columnHeader5;
+//        private System.Windows.Forms.ColumnHeader columnHeader6;
+//        private System.Windows.Forms.ColumnHeader columnHeader7;
+//        private System.Windows.Forms.ColumnHeader columnHeader8;
         private System.Windows.Forms.GroupBox groupBoxSetting;
         private System.Windows.Forms.TextBox textBoxRemote;
         private System.Windows.Forms.Label labelServer;

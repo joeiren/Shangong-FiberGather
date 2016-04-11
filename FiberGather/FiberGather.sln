@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Corp.ShanGong.FiberInstrume
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Corp.ShanGong.FiberInstrument.IBizSpec", "Source\Corp.ShanGong.FiberInstrument.IBizSpec\Corp.ShanGong.FiberInstrument.IBizSpec.csproj", "{2BF7D5AC-8E60-4448-A5B0-0169BDE4AB30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Corp.ShanGong.FiberInstrument.Setting", "Source\Corp.ShanGong.FiberInstrument.Setting\Corp.ShanGong.FiberInstrument.Setting.csproj", "{AE3B9264-D797-47F8-A0A7-28CF998094FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,12 @@ Global
 		{2BF7D5AC-8E60-4448-A5B0-0169BDE4AB30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BF7D5AC-8E60-4448-A5B0-0169BDE4AB30}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2BF7D5AC-8E60-4448-A5B0-0169BDE4AB30}.Release|x86.ActiveCfg = Release|Any CPU
+		{AE3B9264-D797-47F8-A0A7-28CF998094FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE3B9264-D797-47F8-A0A7-28CF998094FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE3B9264-D797-47F8-A0A7-28CF998094FB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AE3B9264-D797-47F8-A0A7-28CF998094FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE3B9264-D797-47F8-A0A7-28CF998094FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE3B9264-D797-47F8-A0A7-28CF998094FB}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,5 +109,6 @@ Global
 		{259A9FB2-319A-4BD8-AA5E-73B9A4CBA260} = {9BA183A5-7B8E-4C47-BBDE-BEA0DA73B50F}
 		{AE55845E-13D2-4A71-BD36-E034C308B79B} = {9BA183A5-7B8E-4C47-BBDE-BEA0DA73B50F}
 		{2BF7D5AC-8E60-4448-A5B0-0169BDE4AB30} = {9BA183A5-7B8E-4C47-BBDE-BEA0DA73B50F}
+		{AE3B9264-D797-47F8-A0A7-28CF998094FB} = {9BA183A5-7B8E-4C47-BBDE-BEA0DA73B50F}
 	EndGlobalSection
 EndGlobal

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Corp.ShanGong.FiberInstrument.Common;
+using Corp.ShanGong.FiberInstrument.Setting;
 
 namespace Corp.ShanGong.FiberInstrument.Model
 {

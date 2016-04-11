@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using Corp.ShanGong.FiberInstrument.Common;
+using Corp.ShanGong.FiberInstrument.Setting;
 
 namespace Corp.ShanGong.FiberInstrument.Model
 {

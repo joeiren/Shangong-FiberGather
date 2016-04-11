@@ -72,6 +72,10 @@
       <Project>{6ace9f0a-2f7e-4421-8da4-5711f4d55628}</Project>
       <Name>Corp.ShanGong.FiberInstrument.Net</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Setting\Corp.ShanGong.FiberInstrument.Setting.csproj">
+      <Project>{ae3b9264-d797-47f8-a0a7-28cf998094fb}</Project>
+      <Name>Corp.ShanGong.FiberInstrument.Setting</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

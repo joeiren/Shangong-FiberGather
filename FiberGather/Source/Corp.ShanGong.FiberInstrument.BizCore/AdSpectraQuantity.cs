@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Corp.ShanGong.FiberInstrument.Common;
 using Corp.ShanGong.FiberInstrument.Model;
+using Corp.ShanGong.FiberInstrument.Setting;
 
 namespace Corp.ShanGong.FiberInstrument.BizCore
 {

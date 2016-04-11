@@ -11,6 +11,7 @@ using Corp.ShanGong.FiberInstrument.BizCore;
 using Corp.ShanGong.FiberInstrument.Common;
 using Corp.ShanGong.FiberInstrument.IBizSpec;
 using Corp.ShanGong.FiberInstrument.Model;
+using Corp.ShanGong.FiberInstrument.Setting;
 using Timer = System.Windows.Forms.Timer;
 
 namespace Corp.ShanGong.FiberInstrument.Presentation

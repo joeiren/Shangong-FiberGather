@@ -90,7 +90,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 
          
                 zedGraphControl1.GraphPane.CurveList.Clear();
-                var line = zedGraphControl1.GraphPane.AddCurve("波长变化图", _pointList, Color.Lime, SymbolType.None);
+                var line = zedGraphControl1.GraphPane.AddCurve("波长变化图", _pointList, Color.Green, SymbolType.None);
                 line.Line.IsSmooth = true;
                 this.zedGraphControl1.AxisChange();
 

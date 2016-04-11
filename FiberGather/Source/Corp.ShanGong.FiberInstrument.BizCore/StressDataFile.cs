@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Corp.ShanGong.FiberInstrument.Common;
 using Corp.ShanGong.FiberInstrument.Model;
+using Corp.ShanGong.FiberInstrument.Setting;
 using log4net;
 using log4net.Appender;
 

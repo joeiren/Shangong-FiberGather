@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Corp.ShanGong.FiberInstrument.Model
+namespace Corp.ShanGong.FiberInstrument.Setting
 {
     public class GlobalSetting
     {
@@ -32,7 +37,8 @@ namespace Corp.ShanGong.FiberInstrument.Model
             get
             {
                 // read from config file or db
-                return CHANNEL_DEFAULT_8;
+                var channel = ConfigurationManager.AppSettings["channelWay"];
+                return channel!= null ? Convert.ToInt32(channel) : CHANNEL_DEFAULT_8;
             }
         }
 
@@ -44,7 +50,8 @@ namespace Corp.ShanGong.FiberInstrument.Model
             get
             {
                 // load from config file or local
-                return SENSOR_DEFAULT_AMOUNT;
+                var sensor = ConfigurationManager.AppSettings["sensorRange"];
+                return sensor != null ? Convert.ToInt32(sensor) : SENSOR_DEFAULT_AMOUNT;
             }
         }
 
