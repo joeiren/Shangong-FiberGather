@@ -127,6 +127,10 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
                 }
                 return list;
             }
+            catch (BoundaryException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new BoundaryException(ex);

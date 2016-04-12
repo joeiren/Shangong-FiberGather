@@ -12,6 +12,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
     {
         private void InitListView()
         {
+            listViewQuantity.Columns.Clear();
             System.Windows.Forms.ColumnHeader columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listViewQuantity.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             columnHeader1});

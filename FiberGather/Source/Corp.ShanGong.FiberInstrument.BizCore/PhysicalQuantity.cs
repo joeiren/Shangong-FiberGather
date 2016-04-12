@@ -112,15 +112,23 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
 
         private static Dictionary<int, decimal> ShellTempDic(FrequencyMessage message, int length)
         {
-            var tempCache = new ShellTemperatureCache();
-            Dictionary<int, decimal> shellTempDic = new Dictionary<int, decimal>(); // 各通道的管壳温度
-            for (var i = 0; i < length; i++)
+
+            try
             {
-                var shellTemp = QuantityValuePair.CalcShellTemperature(message.Channels[i].ShellTemperature);
-                tempCache.Push(i, shellTemp);
-                shellTempDic.Add(i, tempCache.AverageTemperature(i));
+                var tempCache = new ShellTemperatureCache();
+                Dictionary<int, decimal> shellTempDic = new Dictionary<int, decimal>(); // 各通道的管壳温度
+                for (var i = 0; i < length; i++)
+                {
+                    var shellTemp = QuantityValuePair.CalcShellTemperature(message.Channels[i].ShellTemperature);
+                    tempCache.Push(i, shellTemp);
+                    shellTempDic.Add(i, tempCache.AverageTemperature(i));
+                }
+                return shellTempDic;
             }
-            return shellTempDic;
+            catch (Exception ex)
+            {
+                throw new BoundaryException("设备通道数与实际采集数据不一致，请检查！",ex);
+            }
         }
 
         public string[] ToDataString()
@@ -157,9 +165,9 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
                 for (var j = 0; j < ChannelValues[i].GratingValues.Length; j++)
                 {
                     var wave = ChannelValues[i].GratingValues[j].WaveLengthExtension ?? decimal.Zero;
-                    var phy = ChannelValues[i].GratingValues[j].PhysicalValue ?? decimal.Zero;
+                    //var phy = ChannelValues[i].GratingValues[j].PhysicalValue ?? decimal.Zero;
                     builder.AppendFormat("{0} ", wave);
-                    builder.AppendFormat("{0} ", phy);
+                    //builder.AppendFormat("{0} ", phy);
                 }
                 builder.AppendLine();
                 result[i] = builder.ToString();

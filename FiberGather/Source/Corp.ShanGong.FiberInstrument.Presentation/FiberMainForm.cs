@@ -21,6 +21,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         private static Timer _renderTimer;
         private static Timer _mockTimer;
         private static readonly int _sendLocalPort = 9001;
+        private static readonly int _gatherInterval = 100; //采样频率 10HZ(0.1)
         private readonly ConcurrentQueue<PhysicalQuantity> _toSaveQueue = new ConcurrentQueue<PhysicalQuantity>();
         private readonly ConcurrentQueue<PhysicalQuantity> _toSendQueue = new ConcurrentQueue<PhysicalQuantity>();
         private WaveFormViewData _waveViewData;
@@ -29,11 +30,13 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         public FiberMainForm()
         {
             InitializeComponent();
+            ReadProfile();
+           
+            GlobalSetting.Instance.DataFileLocalPath = textBoxDataFileLocalPath.Text;
+            GlobalSetting.Instance.ChannelWay = Convert.ToInt32(comboBoxDeviceType.SelectedItem);
             InitListView();
             InitWaveControl();
-            ReadProfile();
             InitTimer();
-            GlobalSetting.Instance.DataFileLocalPath = textBoxDataFileLocalPath.Text;
             _waveViewData = new WaveFormViewData();
         }
 
@@ -90,6 +93,17 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 {
                     Operator = new InstrumentOperation(LocalPort, RemoteIp, RemotePort);
                 }
+                else
+                {
+                    if (Operator.Communication.Local.Port != LocalPort ||
+                        Operator.Communication.Remote.Port != RemotePort ||
+                        Operator.Communication.Remote.Address.ToString() != RemoteIp)
+                    {
+                        Operator.Communication.Reset();
+                        Operator = null;
+                        Operator = new InstrumentOperation(LocalPort, RemoteIp, RemotePort);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -137,10 +151,24 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                         _toSaveQueue.Enqueue(result.Last());
                     }
                 }
+                catch (BoundaryException bex)
+                {
+                    if (token.CanBeCanceled)
+                    {
+                        _cancelSource.Cancel();
+                        bex.Display += "\t数据接收已退出";
+                    }
+                    ControlRenderInvoke.SafeInvoke(textBoxLog, () => AppendLog(bex.Display));
+                }
                 catch (Exception ex)
                 {
                     var bex = new BoundaryException(ex);
-                    AppendLog(bex.Display);
+                    if (token.CanBeCanceled)
+                    {
+                        _cancelSource.Cancel();
+                        bex.Display += "\t数据接收已退出";
+                    }
+                    ControlRenderInvoke.SafeInvoke(textBoxLog, () => AppendLog(bex.Display));
                 }
             }
         }
@@ -148,7 +176,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         private void InitTimer()
         {
             _renderTimer = new Timer();
-            _renderTimer.Interval = 100; // 0.1秒
+            _renderTimer.Interval = _gatherInterval; 
             _renderTimer.Tick += _renderTimer_Tick;
 
 //            _mockTimer = new Timer();
@@ -219,12 +247,20 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                     {
                         Task.Run(() =>
                         {
-                            //var dataArray = quan.ToDataString();
-                            var dataArray = quan.ToTestDataString();
+                            string[] dataArray;
+                            if (GlobalSetting.Instance.EnableSaveTestData)
+                            {
+                                dataArray = quan.ToTestDataString();
+                            }
+                            else
+                            {
+                                dataArray = quan.ToDataString();
+                            }
                             for (var i = 0; i < dataArray.Length; i++)
                             {
                                 StressDataFile.SaveByChannel(dataArray[i], i + 1);
                             }
+                           
                         });
                     }
                     
@@ -366,7 +402,8 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         private void ReadProfile()
         {
             textBoxLocalPort.Text = OperateIniFile.ReadIniData("basic", "LocalPort", "8001", "profile.ini");
-
+            var index = OperateIniFile.ReadIniData("basic", "ChannelWayIndex", "0", "profile.ini");
+            comboBoxDeviceType.SelectedIndex = string.IsNullOrEmpty(index) ? 0 : Convert.ToInt32(index);
             checkBoxEnableSaveLocal.Checked = (OperateIniFile.ReadIniData("save", "EnableLocalSave", "0", "profile.ini") != "0");
             textBoxDataFileLocalPath.Text = OperateIniFile.ReadIniData("save", "LocalPath", "D:\\", "profile.ini");
 
@@ -380,8 +417,9 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         private void WriteProfile()
         {
             OperateIniFile.WriteIniData("basic", "LocalPort", textBoxLocalPort.Text.Trim(), "profile.ini");
-            OperateIniFile.WriteIniData("save", "EnableLocalSave", checkBoxEnableSaveLocal.Checked ? "1" : "0",
-                "profile.ini");
+            OperateIniFile.WriteIniData("basic", "ChannelWayIndex", comboBoxDeviceType.SelectedIndex.ToString(), "profile.ini");
+
+            OperateIniFile.WriteIniData("save", "EnableLocalSave", checkBoxEnableSaveLocal.Checked ? "1" : "0","profile.ini");
             OperateIniFile.WriteIniData("save", "LocalPath", textBoxDataFileLocalPath.Text, "profile.ini");
 
             OperateIniFile.WriteIniData("save", "EnableSendData", checkBoxSendData.Checked ? "1" : "0", "profile.ini");
@@ -406,5 +444,13 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             textBoxLog.Select(textBoxLog.TextLength, 1);
             textBoxLog.ScrollToCaret();
         }
+
+        private void comboBoxDeviceType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            GlobalSetting.Instance.ChannelWay = Convert.ToInt32(comboBoxDeviceType.SelectedItem);
+            InitListView();
+        }
+
+      
     }
 }

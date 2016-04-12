@@ -83,5 +83,14 @@ namespace Corp.ShanGong.FiberInstrument.Net
             var result = await RecvChanel.ReceiveAsync();
             return result.Buffer;
         }
+
+        public void Reset()
+        {
+            if (SendChanel != null)
+            {
+                SendChanel.Close();
+                SendChanel = null;
+            }
+        }
     }
 }

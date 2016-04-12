@@ -29,24 +29,10 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("1");
-            System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem("2");
-            System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem("3");
-            System.Windows.Forms.ListViewItem listViewItem4 = new System.Windows.Forms.ListViewItem("4");
-            System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem("5");
-            System.Windows.Forms.ListViewItem listViewItem6 = new System.Windows.Forms.ListViewItem("6");
-            System.Windows.Forms.ListViewItem listViewItem7 = new System.Windows.Forms.ListViewItem("7");
-            System.Windows.Forms.ListViewItem listViewItem8 = new System.Windows.Forms.ListViewItem("8");
-            System.Windows.Forms.ListViewItem listViewItem9 = new System.Windows.Forms.ListViewItem("9");
-            System.Windows.Forms.ListViewItem listViewItem10 = new System.Windows.Forms.ListViewItem("10");
-            System.Windows.Forms.ListViewItem listViewItem11 = new System.Windows.Forms.ListViewItem("11");
-            System.Windows.Forms.ListViewItem listViewItem12 = new System.Windows.Forms.ListViewItem("12");
-            System.Windows.Forms.ListViewItem listViewItem13 = new System.Windows.Forms.ListViewItem("13");
-            System.Windows.Forms.ListViewItem listViewItem14 = new System.Windows.Forms.ListViewItem("14");
-            System.Windows.Forms.ListViewItem listViewItem15 = new System.Windows.Forms.ListViewItem("15");
-            System.Windows.Forms.ListViewItem listViewItem16 = new System.Windows.Forms.ListViewItem("16");
             this.listViewQuantity = new System.Windows.Forms.ListView();
             this.groupBoxSetting = new System.Windows.Forms.GroupBox();
+            this.comboBoxDeviceType = new System.Windows.Forms.ComboBox();
+            this.labelDeviceType = new System.Windows.Forms.Label();
             this.textBoxLocalPort = new System.Windows.Forms.TextBox();
             this.labelLocal = new System.Windows.Forms.Label();
             this.buttonStart = new System.Windows.Forms.Button();
@@ -71,7 +57,6 @@
             this.tabPageWave = new System.Windows.Forms.TabPage();
             this.tabPageWaveChart = new System.Windows.Forms.TabPage();
             this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
-//            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBoxSetting.SuspendLayout();
             this.groupBoxSave.SuspendLayout();
             this.tabControlMonitor.SuspendLayout();
@@ -81,32 +66,12 @@
             // 
             // listViewQuantity
             // 
-            this.listViewQuantity.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-//            this.listViewQuantity.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-//            this.columnHeader1});
+            this.listViewQuantity.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewQuantity.GridLines = true;
             this.listViewQuantity.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-//            this.listViewQuantity.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-//            listViewItem1,
-//            listViewItem2,
-//            listViewItem3,
-//            listViewItem4,
-//            listViewItem5,
-//            listViewItem6,
-//            listViewItem7,
-//            listViewItem8,
-//            listViewItem9,
-//            listViewItem10,
-//            listViewItem11,
-//            listViewItem12,
-//            listViewItem13,
-//            listViewItem14,
-//            listViewItem15,
-//            listViewItem16});
             this.listViewQuantity.Location = new System.Drawing.Point(3, 3);
             this.listViewQuantity.Name = "listViewQuantity";
-            this.listViewQuantity.Size = new System.Drawing.Size(989, 372);
+            this.listViewQuantity.Size = new System.Drawing.Size(1245, 372);
             this.listViewQuantity.TabIndex = 30;
             this.listViewQuantity.UseCompatibleStateImageBehavior = false;
             this.listViewQuantity.View = System.Windows.Forms.View.Details;
@@ -115,6 +80,8 @@
             // 
             this.groupBoxSetting.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxSetting.Controls.Add(this.comboBoxDeviceType);
+            this.groupBoxSetting.Controls.Add(this.labelDeviceType);
             this.groupBoxSetting.Controls.Add(this.textBoxLocalPort);
             this.groupBoxSetting.Controls.Add(this.labelLocal);
             this.groupBoxSetting.Controls.Add(this.buttonStart);
@@ -125,10 +92,31 @@
             this.groupBoxSetting.Controls.Add(this.labelServer);
             this.groupBoxSetting.Location = new System.Drawing.Point(3, 12);
             this.groupBoxSetting.Name = "groupBoxSetting";
-            this.groupBoxSetting.Size = new System.Drawing.Size(1003, 82);
+            this.groupBoxSetting.Size = new System.Drawing.Size(1259, 82);
             this.groupBoxSetting.TabIndex = 1;
             this.groupBoxSetting.TabStop = false;
             this.groupBoxSetting.Text = "基本配置";
+            // 
+            // comboBoxDeviceType
+            // 
+            this.comboBoxDeviceType.FormattingEnabled = true;
+            this.comboBoxDeviceType.Items.AddRange(new object[] {
+            "8",
+            "16"});
+            this.comboBoxDeviceType.Location = new System.Drawing.Point(626, 21);
+            this.comboBoxDeviceType.Name = "comboBoxDeviceType";
+            this.comboBoxDeviceType.Size = new System.Drawing.Size(54, 20);
+            this.comboBoxDeviceType.TabIndex = 8;
+            this.comboBoxDeviceType.SelectedIndexChanged += new System.EventHandler(this.comboBoxDeviceType_SelectedIndexChanged);
+            // 
+            // labelDeviceType
+            // 
+            this.labelDeviceType.AutoSize = true;
+            this.labelDeviceType.Location = new System.Drawing.Point(543, 24);
+            this.labelDeviceType.Name = "labelDeviceType";
+            this.labelDeviceType.Size = new System.Drawing.Size(77, 12);
+            this.labelDeviceType.TabIndex = 7;
+            this.labelDeviceType.Text = "解调仪通道数";
             // 
             // textBoxLocalPort
             // 
@@ -337,7 +325,7 @@
             // 
             // textBoxLog
             // 
-            this.textBoxLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBoxLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxLog.BackColor = System.Drawing.Color.LightBlue;
             this.textBoxLog.Location = new System.Drawing.Point(3, 618);
@@ -345,17 +333,20 @@
             this.textBoxLog.Name = "textBoxLog";
             this.textBoxLog.ReadOnly = true;
             this.textBoxLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxLog.Size = new System.Drawing.Size(1003, 110);
+            this.textBoxLog.Size = new System.Drawing.Size(1255, 142);
             this.textBoxLog.TabIndex = 31;
             // 
             // tabControlMonitor
             // 
+            this.tabControlMonitor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControlMonitor.Controls.Add(this.tabPageWave);
             this.tabControlMonitor.Controls.Add(this.tabPageWaveChart);
             this.tabControlMonitor.Location = new System.Drawing.Point(3, 200);
             this.tabControlMonitor.Name = "tabControlMonitor";
             this.tabControlMonitor.SelectedIndex = 0;
-            this.tabControlMonitor.Size = new System.Drawing.Size(1003, 404);
+            this.tabControlMonitor.Size = new System.Drawing.Size(1259, 404);
             this.tabControlMonitor.TabIndex = 32;
             // 
             // tabPageWave
@@ -364,7 +355,7 @@
             this.tabPageWave.Location = new System.Drawing.Point(4, 22);
             this.tabPageWave.Name = "tabPageWave";
             this.tabPageWave.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWave.Size = new System.Drawing.Size(995, 378);
+            this.tabPageWave.Size = new System.Drawing.Size(1251, 378);
             this.tabPageWave.TabIndex = 0;
             this.tabPageWave.Text = "波长值";
             this.tabPageWave.UseVisualStyleBackColor = true;
@@ -395,15 +386,11 @@
             this.zedGraphControl1.TabIndex = 0;
             this.zedGraphControl1.UseExtendedPrintDialog = true;
             // 
-            // columnHeader1
-            // 
-//            this.columnHeader1.Text = "No.";
-            // 
             // FiberMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1008, 733);
+            this.ClientSize = new System.Drawing.Size(1264, 762);
             this.Controls.Add(this.tabControlMonitor);
             this.Controls.Add(this.textBoxLog);
             this.Controls.Add(this.groupBoxSave);
@@ -461,6 +448,8 @@
         private System.Windows.Forms.TabPage tabPageWave;
         private System.Windows.Forms.TabPage tabPageWaveChart;
         private ZedGraph.ZedGraphControl zedGraphControl1;
+        private System.Windows.Forms.ComboBox comboBoxDeviceType;
+        private System.Windows.Forms.Label labelDeviceType;
 //        private System.Windows.Forms.ColumnHeader columnHeader1;
 
     }

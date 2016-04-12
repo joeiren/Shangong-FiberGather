@@ -15,34 +15,42 @@ namespace Corp.ShanGong.FiberInstrument.Model
         {
             get
             {
-                if (_sensorConfigList == null)
+
+                try
                 {
-                    var excelConfig = new ExcelQueryFactory("SensorConfig.xlsx")
+                    if (_sensorConfigList == null)
                     {
-                        ReadOnly = true,
-                        StrictMapping = StrictMappingType.WorksheetStrict
-                    };
-                    excelConfig.AddTransformation<SensorConfig>(it => it.SensorType,
-                        cellValue => SensonTypeConverter(cellValue));
-                    excelConfig.AddTransformation<SensorConfig>(it => it.InitWaveLength,
-                        cellValue => cellValue.ToDecimalNullable());
-                    excelConfig.AddTransformation<SensorConfig>(it => it.InitTemperature,
-                        cellValue => cellValue.ToDecimalNullable());
-                    excelConfig.AddTransformation<SensorConfig>(it => it.FirstWave,
-                        cellValue => cellValue.ToDecimalNullable());
-                    excelConfig.AddTransformation<SensorConfig>(it => it.SensitivityValue,
-                        cellValue => cellValue.ToDecimalNullable());
-                    excelConfig.AddTransformation<SensorConfig>(it => it.TemperatureValue,
-                        cellValue => cellValue.ToDecimalNullable());
-                    excelConfig.AddTransformation<SensorConfig>(it => it.GfrpCTE,
-                        cellValue => cellValue.ToDecimalNullable());
-                    excelConfig.AddTransformation<SensorConfig>(it => it.StructuralCTE,
-                        cellValue => cellValue.ToDecimalNullable());
-                    _sensorConfigList = (from config in excelConfig.WorksheetRange<SensorConfig>("A2", "M5000")
-                        where config.SensorId > 0
-                        select config).ToList();
+                        var excelConfig = new ExcelQueryFactory("SensorConfig.xlsx")
+                        {
+                            ReadOnly = true,
+                            StrictMapping = StrictMappingType.WorksheetStrict
+                        };
+                        excelConfig.AddTransformation<SensorConfig>(it => it.SensorType,
+                            cellValue => SensonTypeConverter(cellValue));
+                        excelConfig.AddTransformation<SensorConfig>(it => it.InitWaveLength,
+                            cellValue => cellValue.ToDecimalNullable());
+                        excelConfig.AddTransformation<SensorConfig>(it => it.InitTemperature,
+                            cellValue => cellValue.ToDecimalNullable());
+                        excelConfig.AddTransformation<SensorConfig>(it => it.FirstWave,
+                            cellValue => cellValue.ToDecimalNullable());
+                        excelConfig.AddTransformation<SensorConfig>(it => it.SensitivityValue,
+                            cellValue => cellValue.ToDecimalNullable());
+                        excelConfig.AddTransformation<SensorConfig>(it => it.TemperatureValue,
+                            cellValue => cellValue.ToDecimalNullable());
+                        excelConfig.AddTransformation<SensorConfig>(it => it.GfrpCTE,
+                            cellValue => cellValue.ToDecimalNullable());
+                        excelConfig.AddTransformation<SensorConfig>(it => it.StructuralCTE,
+                            cellValue => cellValue.ToDecimalNullable());
+                        _sensorConfigList = (from config in excelConfig.WorksheetRange<SensorConfig>("A2", "M5000")
+                                             where config.SensorId > 0
+                                             select config).ToList();
+                    }
+                    return _sensorConfigList;
                 }
-                return _sensorConfigList;
+                catch (Exception ex)
+                {
+                    throw new BoundaryException("读取excel配置文件发生错误！请检查是否安装了Office 2010版本以上的Excel软件,或检查是否正确配置了SensorConfig.xlsx文件！", ex);
+                }
             }
         }
 

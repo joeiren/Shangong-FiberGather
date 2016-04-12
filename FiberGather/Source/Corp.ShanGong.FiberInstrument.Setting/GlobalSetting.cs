@@ -29,6 +29,7 @@ namespace Corp.ShanGong.FiberInstrument.Setting
             }
         }
 
+        private int _channelWay = 0;
         /// <summary>
         ///     通道模式
         /// </summary>
@@ -36,12 +37,15 @@ namespace Corp.ShanGong.FiberInstrument.Setting
         {
             get
             {
-                // read from config file or db
-                var channel = ConfigurationManager.AppSettings["channelWay"];
-                return channel!= null ? Convert.ToInt32(channel) : CHANNEL_DEFAULT_8;
+                return _channelWay == 0 ? CHANNEL_DEFAULT_8 : _channelWay;
+            }
+            set
+            {
+                _channelWay = value;
             }
         }
 
+        private int _sensorCount = 0;
         /// <summary>
         ///     传感器个数
         /// </summary>
@@ -49,9 +53,11 @@ namespace Corp.ShanGong.FiberInstrument.Setting
         {
             get
             {
-                // load from config file or local
-                var sensor = ConfigurationManager.AppSettings["sensorRange"];
-                return sensor != null ? Convert.ToInt32(sensor) : SENSOR_DEFAULT_AMOUNT;
+                return _sensorCount == 0 ? SENSOR_DEFAULT_AMOUNT : _sensorCount;
+            }
+            set
+            {
+                _sensorCount = value;
             }
         }
 
@@ -94,6 +100,20 @@ namespace Corp.ShanGong.FiberInstrument.Setting
         {
             get;
             set;
+        }
+
+
+        /// <summary>
+        ///     当前数据文件保存的日期
+        /// </summary>
+        public bool EnableSaveTestData
+        {
+            get
+            {
+                var enable = ConfigurationManager.AppSettings["enableSaveTestData"];
+                return string.IsNullOrEmpty(enable) ? false : (enable == "1");
+            }
+            
         }
     }
 }
