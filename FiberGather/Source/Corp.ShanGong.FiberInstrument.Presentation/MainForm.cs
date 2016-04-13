@@ -124,7 +124,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                     }
 //                    List<PhysicalQuantity> result = await Task.Run(
 //                        () => Operator.ReadLoop(10, AppSetting.Container.Resolve<IPhysicalCalculator>()).Result);
-                    var result = await Operator.ReadLoop(10, AppSetting.Container.Resolve<IPhysicalCalculator>());
+                    var result = await Operator.ReadLoop(AppSetting.Container.Resolve<IPhysicalCalculator>());
                     if (result.Any())
                     {
                         if (checkBoxSendData.Checked)

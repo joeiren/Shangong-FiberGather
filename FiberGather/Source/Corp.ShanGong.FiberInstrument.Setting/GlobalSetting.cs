@@ -115,5 +115,14 @@ namespace Corp.ShanGong.FiberInstrument.Setting
             }
             
         }
+
+        public int GatherDataFilter
+        {
+            get
+            {
+                var filter = ConfigurationManager.AppSettings["gatherDataFilter"];
+                return string.IsNullOrEmpty(filter) ? 10 : Convert.ToInt32(filter);
+            }
+        }
     }
 }

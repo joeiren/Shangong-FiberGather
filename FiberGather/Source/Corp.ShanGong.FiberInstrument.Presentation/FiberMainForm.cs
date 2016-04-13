@@ -140,7 +140,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                     {
                         return;
                     }
-                    var result = await Operator.ReadLoop(10, AppSetting.Container.Resolve<IPhysicalCalculator>());
+                    var result = await Operator.ReadLoop(AppSetting.Container.Resolve<IPhysicalCalculator>());
                     if (result.Any())
                     {
                         _waveViewData.PushChannelWaveData(result.Last());

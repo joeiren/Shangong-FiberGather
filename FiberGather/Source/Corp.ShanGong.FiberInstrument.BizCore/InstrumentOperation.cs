@@ -7,6 +7,7 @@ using Corp.ShanGong.FiberInstrument.Common;
 using Corp.ShanGong.FiberInstrument.IBizSpec;
 using Corp.ShanGong.FiberInstrument.Model;
 using Corp.ShanGong.FiberInstrument.Net;
+using Corp.ShanGong.FiberInstrument.Setting;
 
 namespace Corp.ShanGong.FiberInstrument.BizCore
 {
@@ -98,12 +99,12 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             return true;
         }
 
-        public async Task<List<PhysicalQuantity>> ReadLoop(int loopTime, IPhysicalCalculator calc)
+        public async Task<List<PhysicalQuantity>> ReadLoop(IPhysicalCalculator calc)
         {
             try
             {
                 var list = new List<PhysicalQuantity>();
-                var breakCount = loopTime;
+                var breakCount = GlobalSetting.Instance.GatherDataFilter;
                 var i = 0;
                 while (i < breakCount)
                 {
