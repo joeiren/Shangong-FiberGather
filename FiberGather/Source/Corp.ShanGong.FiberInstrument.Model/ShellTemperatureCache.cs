@@ -22,7 +22,7 @@ namespace Corp.ShanGong.FiberInstrument.Model
         public ShellTemperatureCache()
         {
             TempQueueDic = new Dictionary<int, Queue<decimal>>();
-            for (var i = 0; i < GlobalSetting.Instance.ChannelWay; i++)
+            for (var i = 0; i < GlobalStaticSetting.Instance.ChannelWay; i++)
             {
                 var q = new Queue<decimal>(1000);
                 TempQueueDic.Add(i, q);

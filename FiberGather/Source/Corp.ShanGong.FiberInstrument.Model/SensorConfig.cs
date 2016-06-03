@@ -1,4 +1,5 @@
-﻿using LinqToExcel.Attributes;
+﻿using Corp.ShanGong.FiberInstrument.Model.LocalSelf;
+using LinqToExcel.Attributes;
 
 namespace Corp.ShanGong.FiberInstrument.Model
 {
@@ -8,7 +9,7 @@ namespace Corp.ShanGong.FiberInstrument.Model
         ///     传感器序号
         /// </summary>
         [ExcelColumn("SensorId")]
-        public int SensorId
+        public string SensorId
         {
             get;
             set;
@@ -45,7 +46,7 @@ namespace Corp.ShanGong.FiberInstrument.Model
         }
 
         /// <summary>
-        ///     传感器类型 1:应变 2：温度
+        ///     传感器类型 1:应变 2：温度 3：位移
         /// </summary>
         [ExcelColumn("SensorType")]
         public int? SensorType
@@ -84,6 +85,16 @@ namespace Corp.ShanGong.FiberInstrument.Model
         }
 
         /// <summary>
+        /// 初始波长2
+        /// </summary>
+        [ExcelColumn("FirstWave2")]
+        public decimal? FirstWave2
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         ///     灵敏度系数
         /// </summary>
         [ExcelColumn("SensitivityValue")]
@@ -103,6 +114,54 @@ namespace Corp.ShanGong.FiberInstrument.Model
             set;
         }
 
+        /// <summary>
+        ///     位移灵敏度系数
+        /// </summary>
+        [ExcelColumn("DisplaceValue")]
+        public decimal? DisplaceValue
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///     波长间隔下限
+        /// </summary>
+        [ExcelColumn("WaveLowerLimit")]
+        public decimal? WaveLowerLimit
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///     波长间隔上限
+        /// </summary>
+        [ExcelColumn("WaveUpperLimit")]
+        public decimal? WaveUpperLimit
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        ///     波长间隔下限
+        /// </summary>
+        [ExcelColumn("WaveLowerLimit")]
+        public decimal? WaveLowerLimit2
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///     波长间隔上限
+        /// </summary>
+        [ExcelColumn("WaveUpperLimit")]
+        public decimal? WaveUpperLimit2
+        {
+            get;
+            set;
+        }
         /// <summary>
         ///     温补编号
         /// </summary>
@@ -131,6 +190,36 @@ namespace Corp.ShanGong.FiberInstrument.Model
         {
             get;
             set;
+        }
+
+
+        public static SensorConfig Parse(ChannelSensorConfig channelInfo)
+        {
+            if (channelInfo == null ||channelInfo.SensorInfo == null)
+            {
+                return null;
+            }
+
+            SensorConfig config = new SensorConfig();
+            config.SensorId = channelInfo.SensorId;
+            config.SensorCode = channelInfo.SensorInfo.DeviceCode;
+            config.ChannelIndex = channelInfo.ChannelNo;
+            config.SensorIndex = channelInfo.SensorIndex;
+            config.SensorType = channelInfo.SensorInfo.SensorType;
+            config.FirstWave = channelInfo.SensorInfo.OrignalWaveLen1;
+            config.FirstWave2 = channelInfo.SensorInfo.OrignalWaveLen2;
+            config.TemperatureExtensionString = channelInfo.TempExSensor;
+            config.SensitivityValue = channelInfo.SensorInfo.SensitivityValue;
+            config.TemperatureValue = channelInfo.SensorInfo.TemperatureValue;
+            config.DisplaceValue = channelInfo.SensorInfo.DisplaceValue;
+            config.InitTemperature = channelInfo.SensorInfo.OrignalTemp;
+            config.WaveLowerLimit = channelInfo.WaveLimitLower;
+            config.WaveUpperLimit = channelInfo.WaveLimitUpper;
+            config.WaveLowerLimit2 = channelInfo.WaveLimitLower2;
+            config.WaveUpperLimit2 = channelInfo.WaveLimitUpper2;
+            config.GfrpCTE = channelInfo.SensorInfo.GfrpCte;
+            config.StructuralCTE = channelInfo.SensorInfo.StructuralCte;
+            return config;
         }
     }
 }

@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Corp.ShanGong.FiberInstrument.Common;
 using Corp.ShanGong.FiberInstrument.IBizSpec;
 using Corp.ShanGong.FiberInstrument.Model;
+using Corp.ShanGong.FiberInstrument.Model.LocalSelf;
 using Corp.ShanGong.FiberInstrument.Setting;
 
 namespace Corp.ShanGong.FiberInstrument.BizCore
 {
     /// <summary>
-    ///     物理量数据
+    ///     从报文（Message）转换到实际波长和物理量数据
     /// </summary>
     public class PhysicalQuantity
     {
         private PhysicalQuantity()
         {
-            ChannelValues = new ChannelQuantity[GlobalSetting.Instance.ChannelWay];
-            ChannelValues.Init(GlobalSetting.Instance.ChannelWay);
+            ChannelValues = new ChannelQuantity[GlobalStaticSetting.Instance.ChannelWay];
+            ChannelValues.Init(GlobalStaticSetting.Instance.ChannelWay);
         }
 
         public DateTime CurrentTime
@@ -31,18 +33,26 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             private set;
         }
 
+        public OrignalQuantity OrignalVal
+        {
+            get;
+            set;
+        }
+
         public static PhysicalQuantity LoadFrom(FrequencyMessage message, IPhysicalCalculator calc, DateTime recTime)
         {
             try
             {
                 var instance = new PhysicalQuantity();
                 instance.CurrentTime = recTime;
-                //计算各通道的管壳温度
-                var shellTempDic = ShellTempDic(message, instance.ChannelValues.Length);
+
+                instance.OrignalVal = new OrignalQuantity();
+                instance.OrignalVal.Init(message);
+
                 //预先计算温补通道的物理量
-                var tempExValuePairs = TempExValuePairs(message, calc, shellTempDic);
+                var tempExValuePairs = TempExValuePairs(instance.OrignalVal, calc);
                 // 计算各传感器的物理量
-                CalcPhysical(message, calc, instance, tempExValuePairs, shellTempDic);
+                CalcPhysical(calc, instance, tempExValuePairs);
                 return instance;
             }
             catch (Exception )
@@ -51,87 +61,112 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             }
         }
 
-        private static void CalcPhysical(FrequencyMessage message, IPhysicalCalculator calc, PhysicalQuantity instance,
-            Dictionary<int, QuantityValuePair> tempExValuePairs, Dictionary<int, decimal> shellTempDic)
+        /// <summary>
+        /// 计算各传感器的物理量
+        /// </summary>
+        /// <param name="calc"></param>
+        /// <param name="instance"></param>
+        /// <param name="tempExValuePairs"></param>
+        private static void CalcPhysical(IPhysicalCalculator calc, PhysicalQuantity instance, Dictionary<string, QuantityValuePair> tempExValuePairs)
         {
-            for (var i = 0; i < instance.ChannelValues.Length; i++)
+            for (var i = 0; i < GlobalStaticSetting.Instance.ChannelWay; i++)
             {
-                for (var j = 0; j < instance.ChannelValues[i].GratingValues.Length; j++)
+                var orignalVal = instance.OrignalVal;
+                var orignalSensors = orignalVal.SensorFrequencyDic[i];
+                
+                for (var j = 0; j < GlobalStaticSetting.Instance.SensorCount; j++)
                 {
-                    var current = SensorConfigManager.GetConfigBy(i + 1, j + 1);
-                   
-                    if (current != null && tempExValuePairs.ContainsKey(current.SensorId))
+                    //var config = SensorConfigManager.GetConfigBy(i + 1, j + 1);
+                    var config = ChannelInfoManager.GetConfigBy(i + 1, j + 1);
+                    if (config != null)
                     {
-                        instance.ChannelValues[i].GratingValues[j] = tempExValuePairs[current.SensorId];
-                    }
-                    else
-                    {
-                        instance.ChannelValues[i].GratingValues[j].Orignal =
-                            QuantityValuePair.CalculateFrequency(message.Channels[i].Gratings[j]);
-                        instance.ChannelValues[i].GratingValues[j].WaveLength =
-                            QuantityValuePair.FrequencyToWavelength(instance.ChannelValues[i].GratingValues[j].Orignal);
-                        var wave =
-                            instance.ChannelValues[i].GratingValues[j].WaveLengthExtension =
-                                QuantityValuePair.CalcFrequencyExtension(
-                                    instance.ChannelValues[i].GratingValues[j].WaveLength, shellTempDic[i]);
-
-                        var extension = SensorConfigManager.GetTemperatureExtensionConfig(current);
-                        decimal? exWave = null;
-                        if (extension != null && tempExValuePairs.ContainsKey(extension.SensorId))
+                        if (tempExValuePairs.ContainsKey(config.SensorId))
                         {
-                            exWave = tempExValuePairs[extension.SensorId].WaveLengthExtension;
+                            instance.ChannelValues[i].GratingValues[j] = tempExValuePairs[config.SensorId];
                         }
-                        instance.ChannelValues[i].GratingValues[j].PhysicalValue =
-                            QuantityValuePair.CalcPhysicalValue(current, wave, calc, extension, exWave);
+                        else
+                        {
+                            //定位当前传感器与那个原始报文消息对应
+                            var indexPair = LocateMessageIndex(config, orignalSensors);
+                            if (indexPair.Item1 != -1)
+                            {
+                                var located = indexPair.Item1;
+                                instance.ChannelValues[i].GratingValues[j].Orignal = orignalSensors[located].FrequencyVal;
+                                instance.ChannelValues[i].GratingValues[j].WaveLength = orignalSensors[located].WaveLength;
+                                var wave = instance.ChannelValues[i].GratingValues[j].WaveLengthExtension = orignalSensors[located].WaveLengthExtension;
+                                decimal? exWave = null; // 温补通道的波长
+                                decimal? wave2 = null;  // 位移传感器的2波长
+                                var extension = ChannelInfoManager.GetTemperatureExtensionConfig(config); // 获取温补通道配置
+                                if (extension != null && tempExValuePairs.ContainsKey(extension.SensorId))
+                                {
+                                    exWave = tempExValuePairs[extension.SensorId].WaveLengthExtension;
+                                }
+
+                                if (indexPair.Item2 != -1)
+                                {
+                                    wave2 = orignalSensors[indexPair.Item2].WaveLengthExtension;
+                                }
+                                var phys = instance.ChannelValues[i].GratingValues[j].PhysicalValue = QuantityValuePair.CalcPhysicalValue(SensorConfig.Parse(config), wave, calc, SensorConfig.Parse(extension), exWave, wave2);
+                                instance.ChannelValues[i].GratingValues[j].ExternalId = config.SensorInfo.SensorIdInServer ?? 0L;
+
+                                if (config.SensorInfo.SensorType == 3 )
+                                {
+                                    j = j + 1;
+                                    if (indexPair.Item2 != -1) // 无法找到位移的第二数据
+                                    {
+                                        var located2 = indexPair.Item2;
+                                        instance.ChannelValues[i].GratingValues[j].Orignal = orignalSensors[located2].FrequencyVal;
+                                        instance.ChannelValues[i].GratingValues[j].WaveLength = orignalSensors[located2].WaveLength;
+                                        wave = instance.ChannelValues[i].GratingValues[j].WaveLengthExtension = orignalSensors[located].WaveLengthExtension;
+                                        instance.ChannelValues[i].GratingValues[j].PhysicalValue = phys;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        private static Dictionary<int, QuantityValuePair> TempExValuePairs(FrequencyMessage message, IPhysicalCalculator calc, 
-            Dictionary<int, decimal> shellTempDic)
+        /// <summary>
+        /// 预先计算温补通道的物理量
+        /// </summary>
+        /// <param name="orignalVal"></param>
+        /// <param name="calc"></param>
+        /// <returns></returns>
+        private static Dictionary<string, QuantityValuePair> TempExValuePairs(OrignalQuantity orignalVal, IPhysicalCalculator calc)
         {
-            var tempExConfigs = SensorConfigManager.GetAllIncludedTempExSensor();
-            Dictionary<int, QuantityValuePair> tempExValuePairs = new Dictionary<int, QuantityValuePair>();
+            var tempExConfigs = ChannelInfoManager.GetAllIncludedTempExSensor();
+            Dictionary<string, QuantityValuePair> tempExValuePairs = new Dictionary<string, QuantityValuePair>();
             foreach (var config in tempExConfigs)
             {
-                var i = config.ChannelIndex - 1;
-                var j = config.SensorIndex - 1;
-                QuantityValuePair pair = new QuantityValuePair();
-                pair.Orignal = QuantityValuePair.CalculateFrequency(message.Channels[i].Gratings[j]);
-                pair.WaveLength = QuantityValuePair.FrequencyToWavelength(pair.Orignal);
-                var wave = pair.WaveLengthExtension = QuantityValuePair.CalcFrequencyExtension(
-                    pair.WaveLength, shellTempDic[i]);
-                var current = SensorConfigManager.GetConfigBy(i + 1, j + 1);
-                //var extension = SensorConfigManager.GetTemperatureExtensionConfig(current);
-                pair.PhysicalValue = QuantityValuePair.CalcPhysicalValue(current, wave, calc); // 温补通道
-                tempExValuePairs.Add(config.SensorId, pair);
+                var i = config.ChannelNo - 1;
+                // 先确定通道里具体的数据和传感器的对应关系
+                var orignalSensors = orignalVal.SensorFrequencyDic[i];
+                var j = LocateTempExMessage(config, orignalSensors);
+                
+                if (j !=-1)
+                {
+                    QuantityValuePair pair = new QuantityValuePair();
+                    pair.Orignal = orignalSensors[j].FrequencyVal;
+                    pair.WaveLength = orignalSensors[j].WaveLength;
+                    var wave = pair.WaveLengthExtension = orignalSensors[j].WaveLengthExtension;
+                    
+                    //var extension = SensorConfigManager.GetTemperatureExtensionConfig(current); // 温补通道本身无需再计算温补后的波长
+                    pair.PhysicalValue = QuantityValuePair.CalcPhysicalValue(SensorConfig.Parse(config), wave, calc); // 温补通道本身的物理量（温度）
+                    pair.ExternalId = config.SensorInfo.SensorIdInServer??0L;
+                    tempExValuePairs.Add(config.SensorId, pair);
+                }
+                
             }
             return tempExValuePairs;
         }
 
-        private static Dictionary<int, decimal> ShellTempDic(FrequencyMessage message, int length)
-        {
-
-            try
-            {
-                var tempCache = new ShellTemperatureCache();
-                Dictionary<int, decimal> shellTempDic = new Dictionary<int, decimal>(); // 各通道的管壳温度
-                for (var i = 0; i < length; i++)
-                {
-                    var shellTemp = QuantityValuePair.CalcShellTemperature(message.Channels[i].ShellTemperature);
-                    tempCache.Push(i, shellTemp);
-                    shellTempDic.Add(i, tempCache.AverageTemperature(i));
-                }
-                return shellTempDic;
-            }
-            catch (Exception ex)
-            {
-                throw new BoundaryException("设备通道数与实际采集数据不一致，请检查！",ex);
-            }
-        }
-
-        public string[] ToDataString()
+        /// <summary>
+        /// 转换成波长数据
+        /// </summary>
+        /// <returns></returns>
+        public string[] ToWaveDataString()
         {
             var result = new string[ChannelValues.Length];
             for (var i = 0; i < ChannelValues.Length; i++)
@@ -140,10 +175,33 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
                 builder.Append(CurrentTime.ToString("yyyy MM dd HH mm ss "));
                 for (var j = 0; j < ChannelValues[i].GratingValues.Length; j++)
                 {
-                    //var wave = ChannelValues[i].GratingValues[j].WaveLengthExtension ?? decimal.Zero;
+                    var wave = ChannelValues[i].GratingValues[j].WaveLengthExtension ?? decimal.Zero;
+                    builder.AppendFormat("{0} ", wave.ToString());
+                }
+                builder.AppendLine();
+                result[i] = builder.ToString();
+            }
+            return result;
+        }
+
+
+        /// <summary>
+        /// 转换成 波长 + 物理量的格式数据 
+        /// </summary>
+        /// <returns></returns>
+        public string[] ToPhysicalWaveDataString()
+        {
+            var result = new string[ChannelValues.Length];
+            for (var i = 0; i < ChannelValues.Length; i++)
+            {
+                var builder = new StringBuilder();
+                builder.Append(CurrentTime.ToString("yyyy-MM-dd HH:mm:ss\t"));
+                for (var j = 0; j < ChannelValues[i].GratingValues.Length; j++)
+                {
+                    var wave = ChannelValues[i].GratingValues[j].WaveLengthExtension ?? decimal.Zero;
                     var phy = ChannelValues[i].GratingValues[j].PhysicalValue ?? decimal.Zero;
-                    //builder.AppendFormat("{0} ", wave.ToString());
-                    builder.AppendFormat("{0} ", phy);
+                    builder.AppendFormat("{0}\t", wave);
+                    builder.AppendFormat("{0}\t", phy);
                 }
                 builder.AppendLine();
                 result[i] = builder.ToString();
@@ -161,18 +219,89 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             for (var i = 0; i < ChannelValues.Length; i++)
             {
                 var builder = new StringBuilder();
-                builder.Append(CurrentTime.ToString("yyyy MM dd HH mm ss "));
+                builder.Append(CurrentTime.ToString("yyyy-MM-dd HH:mm:ss\t"));
                 for (var j = 0; j < ChannelValues[i].GratingValues.Length; j++)
                 {
                     var wave = ChannelValues[i].GratingValues[j].WaveLengthExtension ?? decimal.Zero;
                     //var phy = ChannelValues[i].GratingValues[j].PhysicalValue ?? decimal.Zero;
-                    builder.AppendFormat("{0} ", wave);
+                    builder.AppendFormat("{0}\t", wave);
                     //builder.AppendFormat("{0} ", phy);
                 }
                 builder.AppendLine();
                 result[i] = builder.ToString();
             }
             return result;
+        }
+
+
+        /// <summary>
+        /// 从配置信息（波长的上下限范围）来确定当前配置应匹配那个波长值
+        /// </summary>
+        /// <param name="config">当前配置</param>
+        /// <param name="sensors">一个通道内的采集到的波长（通常应该按从小到大的顺序）</param>
+        /// <returns>当前配置对于的顺序号（位移等特殊传感器，对于一个传感器有2个波长值）</returns>
+        public static Tuple<int, int> LocateMessageIndex(ChannelSensorConfig config, OrignalQuantity.SensorFrequency[] sensors)
+        {
+            int first = -1, second = -1;
+            if (config != null && sensors != null && sensors.Any())
+            {
+                if (config.SensorInfo.OrignalWaveLen1.HasValue)
+                {
+                    var begin = config.WaveLimitLower;
+                    var end = config.WaveLimitUpper;
+                    for (var i = 0; i < sensors.Length; i++)
+                    {
+                        var wave = sensors[i].WaveLengthExtension;
+                        if (wave.HasValue && wave.Value > begin && wave.Value < end)
+                        {
+                            first = i;
+                            break;
+                        }
+                    }
+                }
+                if (config.SensorInfo.OrignalWaveLen2.HasValue && config.SensorInfo.SensorType== 3)
+                {
+                    var begin = config.WaveLimitLower2;
+                    var end = config.WaveLimitUpper2;
+                    for (var i = 0; i < sensors.Length; i++)
+                    {
+                        var wave = sensors[i].WaveLengthExtension;
+                        if (wave.HasValue && wave.Value > begin && wave.Value < end)
+                        {
+                            second = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            return new Tuple<int, int>(first,second);
+        }
+
+        /// <summary>
+        /// 定位温补通道具体对应的频率的位置
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="freqs"></param>
+        /// <returns></returns>
+        public static int LocateTempExMessage(ChannelSensorConfig config, OrignalQuantity.SensorFrequency[] freqs)
+        {
+            if (config != null && freqs != null && freqs.Any())
+            {
+                if (config.SensorInfo.OrignalWaveLen1 != decimal.Zero) // 因为温补通道的为温补传感器，只关心第一个波长
+                {
+                    var begin = config.WaveLimitLower;
+                    var end = config.WaveLimitUpper;
+                    for (var i = 0; i < freqs.Length; i++)
+                    {
+                        var wave = freqs[i].WaveLength;
+                        if (wave.HasValue && wave.Value > begin && wave.Value < end)
+                        {
+                            return i;
+                        }
+                    }
+                }
+            }
+            return -1;
         }
 
         /// <summary>
@@ -182,8 +311,8 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
         {
             public ChannelQuantity()
             {
-                GratingValues = new QuantityValuePair[GlobalSetting.Instance.SensorCount];
-                GratingValues.Init(GlobalSetting.Instance.SensorCount);
+                GratingValues = new QuantityValuePair[GlobalStaticSetting.Instance.SensorCount];
+                GratingValues.Init(GlobalStaticSetting.Instance.SensorCount);
             }
 
             /// <summary>

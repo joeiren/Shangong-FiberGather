@@ -27,8 +27,8 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             var targetAppender = appenders.First(p => p.Name == "StressDataFileAppender") as RollingFileAppender;
             if (targetAppender != null)
             {
-                targetAppender.File = Path.Combine(GlobalSetting.Instance.DataFileLocalPath,
-                    GlobalSetting.Instance.CurrentSaveDate.ToFilePathString());
+                targetAppender.File = Path.Combine(SystemConfigLoader.SystemConfig.LocalRootPath,
+                    GlobalStaticSetting.Instance.CurrentSaveDate.ToFilePathString());
                 targetAppender.ActivateOptions();
             }
             var appends = _loger.Logger.Repository.GetAppenders();
@@ -36,24 +36,24 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
 
         public static void TransmitSaveFilePath()
         {
-            if (DateTime.Now.Year != GlobalSetting.Instance.CurrentSaveDate.Year ||
-                DateTime.Now.Month != GlobalSetting.Instance.CurrentSaveDate.Month ||
-                DateTime.Now.Day != GlobalSetting.Instance.CurrentSaveDate.Day)
+            if (DateTime.Now.Year != GlobalStaticSetting.Instance.CurrentSaveDate.Year ||
+                DateTime.Now.Month != GlobalStaticSetting.Instance.CurrentSaveDate.Month ||
+                DateTime.Now.Day != GlobalStaticSetting.Instance.CurrentSaveDate.Day)
             {
-                GlobalSetting.Instance.CurrentSaveDate = DateTime.Now;
+                GlobalStaticSetting.Instance.CurrentSaveDate = DateTime.Now;
             }
         }
 
         public static void SaveByChannel(string content, int channel)
         {
-            if (DateTime.Now.Year != GlobalSetting.Instance.CurrentSaveDate.Year ||
-                DateTime.Now.Month != GlobalSetting.Instance.CurrentSaveDate.Month ||
-                DateTime.Now.Day != GlobalSetting.Instance.CurrentSaveDate.Day)
+            if (DateTime.Now.Year != GlobalStaticSetting.Instance.CurrentSaveDate.Year ||
+                DateTime.Now.Month != GlobalStaticSetting.Instance.CurrentSaveDate.Month ||
+                DateTime.Now.Day != GlobalStaticSetting.Instance.CurrentSaveDate.Day)
             {
-                GlobalSetting.Instance.CurrentSaveDate = DateTime.Now;
+                GlobalStaticSetting.Instance.CurrentSaveDate = DateTime.Now;
             }
-            var path = Path.Combine(GlobalSetting.Instance.DataFileLocalPath, "结构应力与温度",
-                GlobalSetting.Instance.CurrentSaveDate.ToFilePathString());
+            var path = Path.Combine(SystemConfigLoader.SystemConfig.LocalRootPath, "结构应力与温度",
+                GlobalStaticSetting.Instance.CurrentSaveDate.ToFilePathString());
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);

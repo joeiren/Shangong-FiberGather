@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Corp.ShanGong.FiberInstrument.IBizSpec;
 using Corp.ShanGong.FiberInstrument.Model;
+using Corp.ShanGong.FiberInstrument.Model.LocalSelf;
 using Corp.ShanGong.FiberInstrument.Setting;
 
 namespace Corp.ShanGong.FiberInstrument.BizCore
@@ -53,6 +54,15 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
         }
 
         /// <summary>
+        /// 外部对应Id (对应到数据库Id)
+        /// </summary>
+        public long ExternalId
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         ///     光栅报文信息转频率
         /// </summary>
         /// <param name="grating"></param>
@@ -75,7 +85,7 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             {
                 return null;
             }
-            var waveLen = GlobalSetting.Instance.C_Value/(decimal) frequency;
+            var waveLen = GlobalStaticSetting.Instance.C_Value/(decimal) frequency;
             return Math.Round(waveLen, 3, MidpointRounding.AwayFromZero);
         }
 
@@ -123,18 +133,18 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             }
             var curDic = new ConcurrentDictionary<decimal, long?>();
 
-            Parallel.For(0, _hzTo - _hzFrom + 1, i =>
+            for (var i = 0; i < adPairs.Length; i++)
             {
                 var val = (Convert.ToInt16(adPairs[i].H) << 8) + Convert.ToInt16(adPairs[i].L) - _baseValue;
-                if (val >= 0)
+                if (val > 0)
                 {
-                    var key = FrequencyToWavelength(_hzFrom + i);
+                    var key = FrequencyToWavelength(_hzFrom + i*2);
                     if (key.HasValue)
                     {
                         curDic.TryAdd(key.Value, val);
                     }
                 }
-            });
+            }
 
             return curDic.OrderBy(it => it.Key).ToDictionary(c => c.Key, c => c.Value);
         }
@@ -147,9 +157,10 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
         /// <param name="calculator"></param>
         /// <param name="extensionConfig"></param>
         /// <param name="exWave"></param>
+        /// <param name="wave2">位移传感器中的第二波长数据</param>
         /// <returns></returns>
         public static decimal CalcPhysicalValue(SensorConfig orignalConfig, decimal? wave,
-            IPhysicalCalculator calculator, SensorConfig extensionConfig = null, decimal? exWave = null)
+            IPhysicalCalculator calculator, SensorConfig extensionConfig = null, decimal? exWave = null, decimal? wave2 = null)
         {
             var midPoint = 2; // 小数点几位 
             var result = decimal.Zero;
@@ -168,9 +179,16 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
                         var temp = calculator.CalculateTemperature(orignalConfig, wave);
                         result = temp ?? decimal.Zero;
                         break;
+
+                    case 3:
+                        midPoint = 1;
+                        var displace = calculator.CalculateDisplace(orignalConfig, wave, wave2);
+                        result = displace ?? decimal.Zero;
+                        break;
                 }
             }
             return Math.Round(result, midPoint, MidpointRounding.AwayFromZero);
         }
+
     }
 }

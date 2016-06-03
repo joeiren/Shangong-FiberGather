@@ -9,7 +9,8 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         public static IContainer CreateProjectContainer()
         {
             var container = new ContainerBuilder();
-            container.Register(c => new PhysicalCalculatorSpecCSJM()).As<IPhysicalCalculator>();
+            container.Register(c => new PhysicalCalculatorSpecSW()).As<IPhysicalCalculator>();
+            container.Register(c => new UrlServiceTransfer()).As<IDataPersistence>();
             var result = container.Build();
             return result;
         }

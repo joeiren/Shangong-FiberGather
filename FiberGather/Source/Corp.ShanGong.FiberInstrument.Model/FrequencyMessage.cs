@@ -11,7 +11,7 @@ namespace Corp.ShanGong.FiberInstrument.Model
     /// </summary>
     public class FrequencyMessage : IMessageParse
     {
-        public static readonly int MESSAGE_LENGTH = 2 + GlobalSetting.Instance.ChannelWay*ChannelMessage.MESSAGE_LENGTH;
+        public static readonly int MESSAGE_LENGTH = 2 + GlobalStaticSetting.Instance.ChannelWay*ChannelMessage.CHANNEL_MESSAGE_LENGTH;
         private int _offset;
 
         public byte DeviceId
@@ -36,7 +36,7 @@ namespace Corp.ShanGong.FiberInstrument.Model
         {
             if (message != null && message.Length > 0)
             {
-                if (GlobalSetting.Instance.IsDefaultWay)
+                //if (GlobalStaticSetting.Instance.IsDefaultWay)
                 {
                     if (message.Length >= 530)
                     {
@@ -44,13 +44,13 @@ namespace Corp.ShanGong.FiberInstrument.Model
                         _offset += 1;
                         FunctionCode = message.Skip(_offset).Take(1).Single();
                         _offset += 1;
-                        Channels = new ChannelMessage[GlobalSetting.Instance.ChannelWay];
-                        Channels.Init(GlobalSetting.Instance.ChannelWay);
+                        Channels = new ChannelMessage[GlobalStaticSetting.Instance.ChannelWay];
+                        Channels.Init(GlobalStaticSetting.Instance.ChannelWay);
                         for (var i = 0; i < Channels.Length; i++)
                         {
-                            var channelMessage = message.Skip(_offset).Take(ChannelMessage.MESSAGE_LENGTH).ToArray();
+                            var channelMessage = message.Skip(_offset).Take(ChannelMessage.CHANNEL_MESSAGE_LENGTH).ToArray();
                             Channels[i].Parse(channelMessage);
-                            _offset += ChannelMessage.MESSAGE_LENGTH;
+                            _offset += ChannelMessage.CHANNEL_MESSAGE_LENGTH;
                         }
                     }
                     else
@@ -66,12 +66,12 @@ namespace Corp.ShanGong.FiberInstrument.Model
         /// </summary>
         public class ChannelMessage : IMessageParse
         {
-            public static readonly int MESSAGE_LENGTH = GlobalSetting.Instance.SensorCount*4 + 2;
+            public static readonly int CHANNEL_MESSAGE_LENGTH = GlobalStaticSetting.Instance.SensorCount*4 + 2;
 
             public ChannelMessage()
             {
-                Gratings = new GratingData[GlobalSetting.Instance.SensorCount];
-                Gratings.Init(GlobalSetting.Instance.SensorCount);
+                Gratings = new GratingData[GlobalStaticSetting.Instance.SensorCount];
+                Gratings.Init(GlobalStaticSetting.Instance.SensorCount);
                 ShellTemperature = new AdShellTemp();
             }
 

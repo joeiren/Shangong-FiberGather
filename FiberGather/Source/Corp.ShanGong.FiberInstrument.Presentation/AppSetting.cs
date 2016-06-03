@@ -11,7 +11,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             set;
         }
 
-        public static GlobalSetting StartupConfig
+        public static GlobalStaticSetting StartupConfig
         {
             get;
             set;

@@ -31,8 +31,10 @@
             this.components = new System.ComponentModel.Container();
             this.listViewQuantity = new System.Windows.Forms.ListView();
             this.groupBoxSetting = new System.Windows.Forms.GroupBox();
-            this.comboBoxDeviceType = new System.Windows.Forms.ComboBox();
-            this.labelDeviceType = new System.Windows.Forms.Label();
+            this.comboBoxChannel = new System.Windows.Forms.ComboBox();
+            this.checkBoxDebugMode = new System.Windows.Forms.CheckBox();
+            this.labelCollectInterval = new System.Windows.Forms.Label();
+            this.numUDCollect = new System.Windows.Forms.NumericUpDown();
             this.textBoxLocalPort = new System.Windows.Forms.TextBox();
             this.labelLocal = new System.Windows.Forms.Label();
             this.buttonStart = new System.Windows.Forms.Button();
@@ -42,6 +44,14 @@
             this.textBoxRemote = new System.Windows.Forms.TextBox();
             this.labelServer = new System.Windows.Forms.Label();
             this.groupBoxSave = new System.Windows.Forms.GroupBox();
+            this.labelDbSaveInterval = new System.Windows.Forms.Label();
+            this.numUDDbSaveInterval = new System.Windows.Forms.NumericUpDown();
+            this.labelDbConfig = new System.Windows.Forms.Label();
+            this.textBoxDbConfigString = new System.Windows.Forms.TextBox();
+            this.labelSendInterval = new System.Windows.Forms.Label();
+            this.numUDNetSendInterval = new System.Windows.Forms.NumericUpDown();
+            this.labelLocalSaveInterval = new System.Windows.Forms.Label();
+            this.numUDLocalSaveInterval = new System.Windows.Forms.NumericUpDown();
             this.textBoxSendRemotePort = new System.Windows.Forms.TextBox();
             this.labelSendPort = new System.Windows.Forms.Label();
             this.textBoxSendRemoteIp = new System.Windows.Forms.TextBox();
@@ -57,11 +67,18 @@
             this.tabPageWave = new System.Windows.Forms.TabPage();
             this.tabPageWaveChart = new System.Windows.Forms.TabPage();
             this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
+            this.tabPageAdChart = new System.Windows.Forms.TabPage();
+            this.plotViewAdChart = new OxyPlot.WindowsForms.PlotView();
             this.groupBoxSetting.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numUDCollect)).BeginInit();
             this.groupBoxSave.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numUDDbSaveInterval)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numUDNetSendInterval)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numUDLocalSaveInterval)).BeginInit();
             this.tabControlMonitor.SuspendLayout();
             this.tabPageWave.SuspendLayout();
             this.tabPageWaveChart.SuspendLayout();
+            this.tabPageAdChart.SuspendLayout();
             this.SuspendLayout();
             // 
             // listViewQuantity
@@ -71,7 +88,7 @@
             this.listViewQuantity.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewQuantity.Location = new System.Drawing.Point(3, 3);
             this.listViewQuantity.Name = "listViewQuantity";
-            this.listViewQuantity.Size = new System.Drawing.Size(1245, 372);
+            this.listViewQuantity.Size = new System.Drawing.Size(1160, 442);
             this.listViewQuantity.TabIndex = 30;
             this.listViewQuantity.UseCompatibleStateImageBehavior = false;
             this.listViewQuantity.View = System.Windows.Forms.View.Details;
@@ -80,8 +97,10 @@
             // 
             this.groupBoxSetting.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBoxSetting.Controls.Add(this.comboBoxDeviceType);
-            this.groupBoxSetting.Controls.Add(this.labelDeviceType);
+            this.groupBoxSetting.Controls.Add(this.comboBoxChannel);
+            this.groupBoxSetting.Controls.Add(this.checkBoxDebugMode);
+            this.groupBoxSetting.Controls.Add(this.labelCollectInterval);
+            this.groupBoxSetting.Controls.Add(this.numUDCollect);
             this.groupBoxSetting.Controls.Add(this.textBoxLocalPort);
             this.groupBoxSetting.Controls.Add(this.labelLocal);
             this.groupBoxSetting.Controls.Add(this.buttonStart);
@@ -92,36 +111,69 @@
             this.groupBoxSetting.Controls.Add(this.labelServer);
             this.groupBoxSetting.Location = new System.Drawing.Point(3, 12);
             this.groupBoxSetting.Name = "groupBoxSetting";
-            this.groupBoxSetting.Size = new System.Drawing.Size(1259, 82);
+            this.groupBoxSetting.Size = new System.Drawing.Size(1174, 58);
             this.groupBoxSetting.TabIndex = 1;
             this.groupBoxSetting.TabStop = false;
             this.groupBoxSetting.Text = "基本配置";
             // 
-            // comboBoxDeviceType
+            // comboBoxChannel
             // 
-            this.comboBoxDeviceType.FormattingEnabled = true;
-            this.comboBoxDeviceType.Items.AddRange(new object[] {
-            "8",
-            "16"});
-            this.comboBoxDeviceType.Location = new System.Drawing.Point(626, 21);
-            this.comboBoxDeviceType.Name = "comboBoxDeviceType";
-            this.comboBoxDeviceType.Size = new System.Drawing.Size(54, 20);
-            this.comboBoxDeviceType.TabIndex = 8;
-            this.comboBoxDeviceType.SelectedIndexChanged += new System.EventHandler(this.comboBoxDeviceType_SelectedIndexChanged);
+            this.comboBoxChannel.FormattingEnabled = true;
+            this.comboBoxChannel.Location = new System.Drawing.Point(685, 17);
+            this.comboBoxChannel.Name = "comboBoxChannel";
+            this.comboBoxChannel.Size = new System.Drawing.Size(80, 20);
+            this.comboBoxChannel.TabIndex = 23;
+            this.comboBoxChannel.Visible = false;
+            this.comboBoxChannel.SelectedIndexChanged += new System.EventHandler(this.comboBoxChannel_SelectedIndexChanged);
             // 
-            // labelDeviceType
+            // checkBoxDebugMode
             // 
-            this.labelDeviceType.AutoSize = true;
-            this.labelDeviceType.Location = new System.Drawing.Point(543, 24);
-            this.labelDeviceType.Name = "labelDeviceType";
-            this.labelDeviceType.Size = new System.Drawing.Size(77, 12);
-            this.labelDeviceType.TabIndex = 7;
-            this.labelDeviceType.Text = "解调仪通道数";
+            this.checkBoxDebugMode.AutoSize = true;
+            this.checkBoxDebugMode.Location = new System.Drawing.Point(614, 21);
+            this.checkBoxDebugMode.Name = "checkBoxDebugMode";
+            this.checkBoxDebugMode.Size = new System.Drawing.Size(72, 16);
+            this.checkBoxDebugMode.TabIndex = 9;
+            this.checkBoxDebugMode.Text = "调试模式";
+            this.checkBoxDebugMode.UseVisualStyleBackColor = true;
+            this.checkBoxDebugMode.CheckedChanged += new System.EventHandler(this.checkBoxDebugMode_CheckedChanged);
+            // 
+            // labelCollectInterval
+            // 
+            this.labelCollectInterval.AutoSize = true;
+            this.labelCollectInterval.Location = new System.Drawing.Point(449, 23);
+            this.labelCollectInterval.Name = "labelCollectInterval";
+            this.labelCollectInterval.Size = new System.Drawing.Size(53, 12);
+            this.labelCollectInterval.TabIndex = 8;
+            this.labelCollectInterval.Text = "采样间隔";
+            // 
+            // numUDCollect
+            // 
+            this.numUDCollect.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numUDCollect.Location = new System.Drawing.Point(508, 20);
+            this.numUDCollect.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numUDCollect.Name = "numUDCollect";
+            this.numUDCollect.Size = new System.Drawing.Size(62, 21);
+            this.numUDCollect.TabIndex = 7;
+            this.numUDCollect.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numUDCollect.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numUDCollect.ValueChanged += new System.EventHandler(this.numUD_ValueChanged);
             // 
             // textBoxLocalPort
             // 
             this.textBoxLocalPort.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.textBoxLocalPort.Location = new System.Drawing.Point(103, 59);
+            this.textBoxLocalPort.Location = new System.Drawing.Point(409, 21);
             this.textBoxLocalPort.MaxLength = 16;
             this.textBoxLocalPort.Name = "textBoxLocalPort";
             this.textBoxLocalPort.Size = new System.Drawing.Size(35, 21);
@@ -131,7 +183,7 @@
             // labelLocal
             // 
             this.labelLocal.AutoSize = true;
-            this.labelLocal.Location = new System.Drawing.Point(6, 63);
+            this.labelLocal.Location = new System.Drawing.Point(312, 25);
             this.labelLocal.Name = "labelLocal";
             this.labelLocal.Size = new System.Drawing.Size(77, 12);
             this.labelLocal.TabIndex = 6;
@@ -139,9 +191,9 @@
             // 
             // buttonStart
             // 
-            this.buttonStart.Location = new System.Drawing.Point(405, 18);
+            this.buttonStart.Location = new System.Drawing.Point(1066, 13);
             this.buttonStart.Name = "buttonStart";
-            this.buttonStart.Size = new System.Drawing.Size(75, 58);
+            this.buttonStart.Size = new System.Drawing.Size(75, 31);
             this.buttonStart.TabIndex = 5;
             this.buttonStart.Text = "启动";
             this.buttonStart.UseVisualStyleBackColor = true;
@@ -149,9 +201,9 @@
             // 
             // buttonConnect
             // 
-            this.buttonConnect.Location = new System.Drawing.Point(311, 18);
+            this.buttonConnect.Location = new System.Drawing.Point(985, 13);
             this.buttonConnect.Name = "buttonConnect";
-            this.buttonConnect.Size = new System.Drawing.Size(75, 58);
+            this.buttonConnect.Size = new System.Drawing.Size(75, 33);
             this.buttonConnect.TabIndex = 4;
             this.buttonConnect.Text = "测试连接";
             this.buttonConnect.UseVisualStyleBackColor = true;
@@ -199,6 +251,14 @@
             // 
             // groupBoxSave
             // 
+            this.groupBoxSave.Controls.Add(this.labelDbSaveInterval);
+            this.groupBoxSave.Controls.Add(this.numUDDbSaveInterval);
+            this.groupBoxSave.Controls.Add(this.labelDbConfig);
+            this.groupBoxSave.Controls.Add(this.textBoxDbConfigString);
+            this.groupBoxSave.Controls.Add(this.labelSendInterval);
+            this.groupBoxSave.Controls.Add(this.numUDNetSendInterval);
+            this.groupBoxSave.Controls.Add(this.labelLocalSaveInterval);
+            this.groupBoxSave.Controls.Add(this.numUDLocalSaveInterval);
             this.groupBoxSave.Controls.Add(this.textBoxSendRemotePort);
             this.groupBoxSave.Controls.Add(this.labelSendPort);
             this.groupBoxSave.Controls.Add(this.textBoxSendRemoteIp);
@@ -209,20 +269,150 @@
             this.groupBoxSave.Controls.Add(this.buttonBrowser);
             this.groupBoxSave.Controls.Add(this.textBoxDataFileLocalPath);
             this.groupBoxSave.Controls.Add(this.labelLocalPath);
-            this.groupBoxSave.Location = new System.Drawing.Point(3, 100);
+            this.groupBoxSave.Location = new System.Drawing.Point(8, 72);
             this.groupBoxSave.Name = "groupBoxSave";
-            this.groupBoxSave.Size = new System.Drawing.Size(1003, 94);
+            this.groupBoxSave.Size = new System.Drawing.Size(1136, 129);
             this.groupBoxSave.TabIndex = 2;
             this.groupBoxSave.TabStop = false;
             this.groupBoxSave.Text = "保存配置";
             // 
+            // labelDbSaveInterval
+            // 
+            this.labelDbSaveInterval.AutoSize = true;
+            this.labelDbSaveInterval.Location = new System.Drawing.Point(501, 96);
+            this.labelDbSaveInterval.Name = "labelDbSaveInterval";
+            this.labelDbSaveInterval.Size = new System.Drawing.Size(53, 12);
+            this.labelDbSaveInterval.TabIndex = 22;
+            this.labelDbSaveInterval.Text = "保存间隔";
+            this.labelDbSaveInterval.Visible = false;
+            // 
+            // numUDDbSaveInterval
+            // 
+            this.numUDDbSaveInterval.Increment = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+            this.numUDDbSaveInterval.Location = new System.Drawing.Point(560, 92);
+            this.numUDDbSaveInterval.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.numUDDbSaveInterval.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numUDDbSaveInterval.Name = "numUDDbSaveInterval";
+            this.numUDDbSaveInterval.Size = new System.Drawing.Size(62, 21);
+            this.numUDDbSaveInterval.TabIndex = 21;
+            this.numUDDbSaveInterval.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numUDDbSaveInterval.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numUDDbSaveInterval.Visible = false;
+            this.numUDDbSaveInterval.ValueChanged += new System.EventHandler(this.numUD_ValueChanged);
+            // 
+            // labelDbConfig
+            // 
+            this.labelDbConfig.AutoSize = true;
+            this.labelDbConfig.Location = new System.Drawing.Point(136, 99);
+            this.labelDbConfig.Name = "labelDbConfig";
+            this.labelDbConfig.Size = new System.Drawing.Size(77, 12);
+            this.labelDbConfig.TabIndex = 20;
+            this.labelDbConfig.Text = "保存配置信息";
+            this.labelDbConfig.Visible = false;
+            // 
+            // textBoxDbConfigString
+            // 
+            this.textBoxDbConfigString.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.textBoxDbConfigString.Location = new System.Drawing.Point(210, 95);
+            this.textBoxDbConfigString.MaxLength = 256;
+            this.textBoxDbConfigString.Name = "textBoxDbConfigString";
+            this.textBoxDbConfigString.Size = new System.Drawing.Size(278, 21);
+            this.textBoxDbConfigString.TabIndex = 19;
+            this.textBoxDbConfigString.Visible = false;
+            // 
+            // labelSendInterval
+            // 
+            this.labelSendInterval.AutoSize = true;
+            this.labelSendInterval.Location = new System.Drawing.Point(501, 62);
+            this.labelSendInterval.Name = "labelSendInterval";
+            this.labelSendInterval.Size = new System.Drawing.Size(53, 12);
+            this.labelSendInterval.TabIndex = 18;
+            this.labelSendInterval.Text = "发送间隔";
+            this.labelSendInterval.Visible = false;
+            // 
+            // numUDNetSendInterval
+            // 
+            this.numUDNetSendInterval.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numUDNetSendInterval.Location = new System.Drawing.Point(560, 59);
+            this.numUDNetSendInterval.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numUDNetSendInterval.Name = "numUDNetSendInterval";
+            this.numUDNetSendInterval.Size = new System.Drawing.Size(62, 21);
+            this.numUDNetSendInterval.TabIndex = 17;
+            this.numUDNetSendInterval.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numUDNetSendInterval.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numUDNetSendInterval.Visible = false;
+            this.numUDNetSendInterval.ValueChanged += new System.EventHandler(this.numUD_ValueChanged);
+            // 
+            // labelLocalSaveInterval
+            // 
+            this.labelLocalSaveInterval.AutoSize = true;
+            this.labelLocalSaveInterval.Location = new System.Drawing.Point(501, 24);
+            this.labelLocalSaveInterval.Name = "labelLocalSaveInterval";
+            this.labelLocalSaveInterval.Size = new System.Drawing.Size(53, 12);
+            this.labelLocalSaveInterval.TabIndex = 10;
+            this.labelLocalSaveInterval.Text = "保存间隔";
+            this.labelLocalSaveInterval.Visible = false;
+            // 
+            // numUDLocalSaveInterval
+            // 
+            this.numUDLocalSaveInterval.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numUDLocalSaveInterval.Location = new System.Drawing.Point(560, 21);
+            this.numUDLocalSaveInterval.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numUDLocalSaveInterval.Name = "numUDLocalSaveInterval";
+            this.numUDLocalSaveInterval.Size = new System.Drawing.Size(62, 21);
+            this.numUDLocalSaveInterval.TabIndex = 9;
+            this.numUDLocalSaveInterval.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numUDLocalSaveInterval.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numUDLocalSaveInterval.Visible = false;
+            this.numUDLocalSaveInterval.ValueChanged += new System.EventHandler(this.numUD_ValueChanged);
+            // 
             // textBoxSendRemotePort
             // 
             this.textBoxSendRemotePort.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.textBoxSendRemotePort.Location = new System.Drawing.Point(341, 59);
+            this.textBoxSendRemotePort.Location = new System.Drawing.Point(404, 59);
             this.textBoxSendRemotePort.MaxLength = 16;
             this.textBoxSendRemotePort.Name = "textBoxSendRemotePort";
-            this.textBoxSendRemotePort.Size = new System.Drawing.Size(35, 21);
+            this.textBoxSendRemotePort.Size = new System.Drawing.Size(78, 21);
             this.textBoxSendRemotePort.TabIndex = 11;
             this.textBoxSendRemotePort.Text = "9000";
             this.textBoxSendRemotePort.Visible = false;
@@ -230,7 +420,7 @@
             // labelSendPort
             // 
             this.labelSendPort.AutoSize = true;
-            this.labelSendPort.Location = new System.Drawing.Point(306, 62);
+            this.labelSendPort.Location = new System.Drawing.Point(369, 62);
             this.labelSendPort.Name = "labelSendPort";
             this.labelSendPort.Size = new System.Drawing.Size(29, 12);
             this.labelSendPort.TabIndex = 16;
@@ -240,10 +430,10 @@
             // textBoxSendRemoteIp
             // 
             this.textBoxSendRemoteIp.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.textBoxSendRemoteIp.Location = new System.Drawing.Point(184, 59);
+            this.textBoxSendRemoteIp.Location = new System.Drawing.Point(210, 61);
             this.textBoxSendRemoteIp.MaxLength = 16;
             this.textBoxSendRemoteIp.Name = "textBoxSendRemoteIp";
-            this.textBoxSendRemoteIp.Size = new System.Drawing.Size(92, 21);
+            this.textBoxSendRemoteIp.Size = new System.Drawing.Size(116, 21);
             this.textBoxSendRemoteIp.TabIndex = 10;
             this.textBoxSendRemoteIp.Text = "192.168.0.19";
             this.textBoxSendRemoteIp.Visible = false;
@@ -251,7 +441,7 @@
             // labelSendIp
             // 
             this.labelSendIp.AutoSize = true;
-            this.labelSendIp.Location = new System.Drawing.Point(113, 64);
+            this.labelSendIp.Location = new System.Drawing.Point(140, 64);
             this.labelSendIp.Name = "labelSendIp";
             this.labelSendIp.Size = new System.Drawing.Size(65, 12);
             this.labelSendIp.TabIndex = 14;
@@ -272,13 +462,13 @@
             // checkBoxEnableSaveDB
             // 
             this.checkBoxEnableSaveDB.AutoSize = true;
-            this.checkBoxEnableSaveDB.Location = new System.Drawing.Point(497, 25);
+            this.checkBoxEnableSaveDB.Location = new System.Drawing.Point(11, 98);
             this.checkBoxEnableSaveDB.Name = "checkBoxEnableSaveDB";
             this.checkBoxEnableSaveDB.Size = new System.Drawing.Size(108, 16);
             this.checkBoxEnableSaveDB.TabIndex = 12;
             this.checkBoxEnableSaveDB.Text = "启用数据库保存";
             this.checkBoxEnableSaveDB.UseVisualStyleBackColor = true;
-            this.checkBoxEnableSaveDB.Visible = false;
+            this.checkBoxEnableSaveDB.CheckedChanged += new System.EventHandler(this.checkBoxEnableSaveDB_CheckedChanged);
             // 
             // checkBoxEnableSaveLocal
             // 
@@ -328,12 +518,12 @@
             this.textBoxLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxLog.BackColor = System.Drawing.Color.LightBlue;
-            this.textBoxLog.Location = new System.Drawing.Point(3, 618);
+            this.textBoxLog.Location = new System.Drawing.Point(0, 687);
             this.textBoxLog.Multiline = true;
             this.textBoxLog.Name = "textBoxLog";
             this.textBoxLog.ReadOnly = true;
             this.textBoxLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxLog.Size = new System.Drawing.Size(1255, 142);
+            this.textBoxLog.Size = new System.Drawing.Size(1170, 42);
             this.textBoxLog.TabIndex = 31;
             // 
             // tabControlMonitor
@@ -343,10 +533,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControlMonitor.Controls.Add(this.tabPageWave);
             this.tabControlMonitor.Controls.Add(this.tabPageWaveChart);
-            this.tabControlMonitor.Location = new System.Drawing.Point(3, 200);
+            this.tabControlMonitor.Controls.Add(this.tabPageAdChart);
+            this.tabControlMonitor.Location = new System.Drawing.Point(8, 207);
             this.tabControlMonitor.Name = "tabControlMonitor";
             this.tabControlMonitor.SelectedIndex = 0;
-            this.tabControlMonitor.Size = new System.Drawing.Size(1259, 404);
+            this.tabControlMonitor.Size = new System.Drawing.Size(1174, 474);
             this.tabControlMonitor.TabIndex = 32;
             // 
             // tabPageWave
@@ -355,7 +546,7 @@
             this.tabPageWave.Location = new System.Drawing.Point(4, 22);
             this.tabPageWave.Name = "tabPageWave";
             this.tabPageWave.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWave.Size = new System.Drawing.Size(1251, 378);
+            this.tabPageWave.Size = new System.Drawing.Size(1166, 448);
             this.tabPageWave.TabIndex = 0;
             this.tabPageWave.Text = "波长值";
             this.tabPageWave.UseVisualStyleBackColor = true;
@@ -366,7 +557,7 @@
             this.tabPageWaveChart.Location = new System.Drawing.Point(4, 22);
             this.tabPageWaveChart.Name = "tabPageWaveChart";
             this.tabPageWaveChart.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWaveChart.Size = new System.Drawing.Size(995, 378);
+            this.tabPageWaveChart.Size = new System.Drawing.Size(1166, 448);
             this.tabPageWaveChart.TabIndex = 1;
             this.tabPageWaveChart.Text = "波长图";
             this.tabPageWaveChart.UseVisualStyleBackColor = true;
@@ -386,11 +577,34 @@
             this.zedGraphControl1.TabIndex = 0;
             this.zedGraphControl1.UseExtendedPrintDialog = true;
             // 
+            // tabPageAdChart
+            // 
+            this.tabPageAdChart.Controls.Add(this.plotViewAdChart);
+            this.tabPageAdChart.Location = new System.Drawing.Point(4, 22);
+            this.tabPageAdChart.Name = "tabPageAdChart";
+            this.tabPageAdChart.Size = new System.Drawing.Size(1166, 448);
+            this.tabPageAdChart.TabIndex = 2;
+            this.tabPageAdChart.Text = "光谱图";
+            this.tabPageAdChart.UseVisualStyleBackColor = true;
+            // 
+            // plotViewAdChart
+            // 
+            this.plotViewAdChart.BackColor = System.Drawing.Color.White;
+            this.plotViewAdChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.plotViewAdChart.Location = new System.Drawing.Point(0, 0);
+            this.plotViewAdChart.Name = "plotViewAdChart";
+            this.plotViewAdChart.PanCursor = System.Windows.Forms.Cursors.Hand;
+            this.plotViewAdChart.Size = new System.Drawing.Size(1166, 448);
+            this.plotViewAdChart.TabIndex = 0;
+            this.plotViewAdChart.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
+            this.plotViewAdChart.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
+            this.plotViewAdChart.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
+            // 
             // FiberMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1264, 762);
+            this.ClientSize = new System.Drawing.Size(1179, 731);
             this.Controls.Add(this.tabControlMonitor);
             this.Controls.Add(this.textBoxLog);
             this.Controls.Add(this.groupBoxSave);
@@ -401,11 +615,16 @@
             this.Text = "光纤光栅解调仪";
             this.groupBoxSetting.ResumeLayout(false);
             this.groupBoxSetting.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numUDCollect)).EndInit();
             this.groupBoxSave.ResumeLayout(false);
             this.groupBoxSave.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numUDDbSaveInterval)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numUDNetSendInterval)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numUDLocalSaveInterval)).EndInit();
             this.tabControlMonitor.ResumeLayout(false);
             this.tabPageWave.ResumeLayout(false);
             this.tabPageWaveChart.ResumeLayout(false);
+            this.tabPageAdChart.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -448,9 +667,21 @@
         private System.Windows.Forms.TabPage tabPageWave;
         private System.Windows.Forms.TabPage tabPageWaveChart;
         private ZedGraph.ZedGraphControl zedGraphControl1;
-        private System.Windows.Forms.ComboBox comboBoxDeviceType;
-        private System.Windows.Forms.Label labelDeviceType;
+        private System.Windows.Forms.Label labelCollectInterval;
+        private System.Windows.Forms.NumericUpDown numUDCollect;
+        private System.Windows.Forms.Label labelDbSaveInterval;
+        private System.Windows.Forms.NumericUpDown numUDDbSaveInterval;
+        private System.Windows.Forms.Label labelDbConfig;
+        private System.Windows.Forms.TextBox textBoxDbConfigString;
+        private System.Windows.Forms.Label labelSendInterval;
+        private System.Windows.Forms.NumericUpDown numUDNetSendInterval;
+        private System.Windows.Forms.Label labelLocalSaveInterval;
+        private System.Windows.Forms.NumericUpDown numUDLocalSaveInterval;
+        private System.Windows.Forms.CheckBox checkBoxDebugMode;
+        private System.Windows.Forms.TabPage tabPageAdChart;
 //        private System.Windows.Forms.ColumnHeader columnHeader1;
+        private OxyPlot.WindowsForms.PlotView plotViewAdChart;
+        private System.Windows.Forms.ComboBox comboBoxChannel;
 
     }
 }

@@ -44,10 +44,16 @@ namespace Corp.ShanGong.FiberInstrument.ProjectSpec
             return stressChanged;
         }
 
-        public List<SensorConfig> Configs
+//        public List<SensorConfig> Configs
+//        {
+//            get;
+//            set;
+//        }
+
+
+        public decimal? CalculateDisplace(SensorConfig config, decimal? waveLength, decimal? waveLength2)
         {
-            get;
-            set;
+            throw new NotImplementedException();
         }
     }
 }

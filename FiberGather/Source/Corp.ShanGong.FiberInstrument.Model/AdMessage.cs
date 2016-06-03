@@ -11,14 +11,14 @@ namespace Corp.ShanGong.FiberInstrument.Model
     {
         public static readonly int AD_DATA_MESSAGE_LENGTH = 2 +
                                                             ChannelMessage.CHANNEL_MESSAGE_LENGTH*
-                                                            GlobalSetting.Instance.ChannelWay;
+                                                            GlobalStaticSetting.Instance.ChannelWay;
 
         private int _offset;
 
         public AdMessage()
         {
-            Channels = new ChannelMessage[GlobalSetting.Instance.ChannelWay];
-            Channels.Init(GlobalSetting.Instance.ChannelWay);
+            Channels = new ChannelMessage[GlobalStaticSetting.Instance.ChannelWay];
+            Channels.Init(GlobalStaticSetting.Instance.ChannelWay);
         }
 
         public byte DeviceId
@@ -47,8 +47,8 @@ namespace Corp.ShanGong.FiberInstrument.Model
                 _offset += 1;
                 FunctionCode = message.Skip(_offset).Take(1).Single();
                 _offset += 1;
-                Channels = new ChannelMessage[GlobalSetting.Instance.ChannelWay];
-                Channels.Init(GlobalSetting.Instance.ChannelWay);
+                Channels = new ChannelMessage[GlobalStaticSetting.Instance.ChannelWay];
+                Channels.Init(GlobalStaticSetting.Instance.ChannelWay);
                 for (var i = 0; i < Channels.Length; i++)
                 {
                     var channelMessage = message.Skip(_offset).Take(ChannelMessage.CHANNEL_MESSAGE_LENGTH).ToArray();
@@ -60,8 +60,8 @@ namespace Corp.ShanGong.FiberInstrument.Model
 
         public class ChannelMessage : IMessageParse
         {
-            public const int DATA_STEP = 1; // AD数据步长 
-            public const int AD_DATA_PAIR_COUNT = 5101/DATA_STEP; //每个通道包含多少个数据域
+            public const int DATA_STEP = 2; // AD数据步长 
+            public const int AD_DATA_PAIR_COUNT = 5102/DATA_STEP; //每个通道包含多少个数据域
             public const int CHANNEL_MESSAGE_LENGTH = 2 + AD_DATA_PAIR_COUNT*2;
 
             public ChannelMessage()

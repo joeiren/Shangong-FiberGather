@@ -74,7 +74,46 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
                 hexstr = "1020060100";
                 senddata = hexstr.ToHexByte();
                 len = await Communication.SendDataAsync(senddata, senddata.Length);
-                Thread.Sleep(1000);
+                Thread.Sleep(200);
+                var result = Communication.RecvChanel.Client.Available > 0;
+                return new Tuple<bool, string>(result, result ? "" : "网络无响应");
+            }
+            catch (Exception ex)
+            {
+                var bex = new BoundaryException(ex);
+                return new Tuple<bool, string>(false, bex.Display);
+            }
+        }
+
+        /// <summary>
+        /// 调试模式（用来获取光谱）
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Tuple<bool, string>> StartWithDebug()
+        {
+            if (Communication == null)
+            {
+                return new Tuple<bool, string>(false, "The object Communication is null!");
+            }
+
+            try
+            {
+                var hexstr = "1004000000";
+                var senddata = hexstr.ToHexByte();
+                var len = await Communication.SendDataAsync(senddata, senddata.Length);
+
+                hexstr = "1005000200";
+                senddata = hexstr.ToHexByte();
+                len = await Communication.SendDataAsync(senddata, senddata.Length);
+
+                hexstr = "100613ec00";
+                senddata = hexstr.ToHexByte();
+                len = await Communication.SendDataAsync(senddata, senddata.Length);
+
+                hexstr = "1020060200"; // 发送调试指令
+                senddata = hexstr.ToHexByte();
+                len = await Communication.SendDataAsync(senddata, senddata.Length);
+                Thread.Sleep(200);
                 var result = Communication.RecvChanel.Client.Available > 0;
                 return new Tuple<bool, string>(result, result ? "" : "网络无响应");
             }
@@ -99,18 +138,20 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             return true;
         }
 
+
+
         public async Task<List<PhysicalQuantity>> ReadLoop(IPhysicalCalculator calc)
         {
             try
             {
                 var list = new List<PhysicalQuantity>();
-                var breakCount = GlobalSetting.Instance.GatherDataFilter;
+                var breakCount =SystemConfigLoader.SystemConfig.CollectInterval;
+
                 var i = 0;
                 while (i < breakCount)
                 {
                     var result = await Communication.ReceiveDataAsync();
-
-                    if (result.Length < 530)
+                    if (result.Length < 530)  // 
                     {
                         continue;
                     }
@@ -136,6 +177,45 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             {
                 throw new BoundaryException(ex);
             }
+        }
+
+        public async Task<AdSpectraQuantity> ReadLoopAd()
+        {
+            var adData = AdDataRead();
+            var message = new AdMessage();
+            message.Parse(adData.Result);
+            var adQuantity = AdSpectraQuantity.LoadForm(message);
+            return adQuantity;
+        }
+
+        public async Task<byte[]> AdDataRead()
+        {
+             int _offset = 0;
+            byte[]  _adData = new byte[AdSpectraQuantity.MESSAGE_LENGTH];
+            _offset -= FrequencyMessage.MESSAGE_LENGTH;
+            var result = await Communication.ReceiveDataAsync();
+
+            while (_offset < AdSpectraQuantity.MESSAGE_LENGTH)
+            {
+                if (_offset + result.Length > 0)
+                {
+                    if (_offset < 0)
+                    {
+                        Array.Copy(result, 0 - _offset, _adData, 0, _offset + result.Length);
+                    }
+                    else
+                    {
+                        Array.Copy(result, 0, _adData, _offset, result.Length);
+                    }
+                }
+                _offset += result.Length;
+                if (_offset >= AdSpectraQuantity.MESSAGE_LENGTH)
+                {
+                    break;
+                }
+                result = await Communication.ReceiveDataAsync();
+            }
+            return _adData;
         }
     }
 }

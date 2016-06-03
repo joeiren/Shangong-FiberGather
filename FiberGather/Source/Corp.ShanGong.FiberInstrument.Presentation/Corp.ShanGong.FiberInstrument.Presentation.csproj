@@ -11,6 +11,7 @@
     <AssemblyName>Corp.ShanGong.FiberInstrument.Presentation</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>发布\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -23,7 +24,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -55,7 +55,14 @@
       <HintPath>..\..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="OxyPlot">
+      <HintPath>..\..\packages\OxyPlot.Core.1.0.0-unstable2100\lib\net45\OxyPlot.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.WindowsForms">
+      <HintPath>..\..\packages\OxyPlot.WindowsForms.1.0.0-unstable2100\lib\net45\OxyPlot.WindowsForms.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -71,12 +78,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdDataChartHandle.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="AppSetting.cs" />
     <Compile Include="BootStrap.cs" />
     <Compile Include="ChannelGridViewData.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ControlRenderInvoke.cs" />
+    <Compile Include="FBGMainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FBGMainForm.Designer.cs">
+      <DependentUpon>FBGMainForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="WaveFormViewData.cs" />
     <Compile Include="FiberMainForm.cs">
       <SubType>Form</SubType>
@@ -84,22 +100,16 @@
     <Compile Include="FiberMainForm.Designer.cs">
       <DependentUpon>FiberMainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WaveFormHandle.cs">
       <SubType>Form</SubType>
     </Compile>
+    <EmbeddedResource Include="FBGMainForm.resx">
+      <DependentUpon>FBGMainForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FiberMainForm.resx">
       <DependentUpon>FiberMainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -110,6 +120,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="LocalSelfDb\fbg_db.sqlite">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="profile.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -136,12 +149,16 @@
       <Project>{ed8e9564-d7a6-4132-8ad7-e094b443c229}</Project>
       <Name>Corp.ShanGong.FiberInstrument.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.DataPersistence\Corp.ShanGong.FiberInstrument.DataPersistence.csproj">
+      <Project>{728f3b92-b939-49fb-bee7-4f10bd4b810c}</Project>
+      <Name>Corp.ShanGong.FiberInstrument.DataPersistence</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.IBizSpec\Corp.ShanGong.FiberInstrument.IBizSpec.csproj">
       <Project>{2bf7d5ac-8e60-4448-a5b0-0169bde4ab30}</Project>
       <Name>Corp.ShanGong.FiberInstrument.IBizSpec</Name>
     </ProjectReference>
     <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Model\Corp.ShanGong.FiberInstrument.Model.csproj">
-      <Project>{bb42c894-8087-4dbb-a6ee-be6c91330f78}</Project>
+      <Project>{BB42C894-8087-4DBB-A6EE-BE6C91330F78}</Project>
       <Name>Corp.ShanGong.FiberInstrument.Model</Name>
     </ProjectReference>
     <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Net\Corp.ShanGong.FiberInstrument.Net.csproj">
@@ -153,12 +170,18 @@
       <Name>Corp.ShanGong.FiberInstrument.ProjectSpec</Name>
     </ProjectReference>
     <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Setting\Corp.ShanGong.FiberInstrument.Setting.csproj">
-      <Project>{ae3b9264-d797-47f8-a0a7-28cf998094fb}</Project>
+      <Project>{AE3B9264-D797-47F8-A0A7-28CF998094FB}</Project>
       <Name>Corp.ShanGong.FiberInstrument.Setting</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="License-LGPL.txt" />
+    <Content Include="x64\SQLite.Interop.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\SQLite.Interop.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">

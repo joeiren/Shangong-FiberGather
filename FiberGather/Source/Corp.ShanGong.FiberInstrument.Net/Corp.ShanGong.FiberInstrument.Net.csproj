@@ -45,10 +45,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Common\Corp.ShanGong.FiberInstrument.Common.csproj">
-      <Project>{ed8e9564-d7a6-4132-8ad7-e094b443c229}</Project>
-      <Name>Corp.ShanGong.FiberInstrument.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Corp.ShanGong.FiberInstrument.Model\Corp.ShanGong.FiberInstrument.Model.csproj">
       <Project>{BB42C894-8087-4DBB-A6EE-BE6C91330F78}</Project>
       <Name>Corp.ShanGong.FiberInstrument.Model</Name>

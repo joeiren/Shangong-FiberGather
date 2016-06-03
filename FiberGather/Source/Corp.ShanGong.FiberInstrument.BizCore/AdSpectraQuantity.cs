@@ -11,10 +11,11 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
     /// </summary>
     public class AdSpectraQuantity
     {
+        public static readonly int MESSAGE_LENGTH = 2 + GlobalStaticSetting.Instance.ChannelWay * (5102 + 2);
         private AdSpectraQuantity()
         {
-            ChannelValues = new Dictionary<decimal, long?>[GlobalSetting.Instance.ChannelWay];
-            ChannelValues.Init(GlobalSetting.Instance.ChannelWay);
+            ChannelValues = new Dictionary<decimal, long?>[GlobalStaticSetting.Instance.ChannelWay];
+            ChannelValues.Init(GlobalStaticSetting.Instance.ChannelWay);
         }
 
         public Dictionary<decimal, long?>[] ChannelValues
@@ -29,7 +30,7 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             {
                 var instance = new AdSpectraQuantity();
 
-                for (var i = 0; i < GlobalSetting.Instance.ChannelWay; i++)
+                for (var i = 0; i < GlobalStaticSetting.Instance.ChannelWay; i++)
                 {
                     instance.ChannelValues[i] = QuantityValuePair.CalcAdOrignal(message.Channels[i].DataRanges);
                 }

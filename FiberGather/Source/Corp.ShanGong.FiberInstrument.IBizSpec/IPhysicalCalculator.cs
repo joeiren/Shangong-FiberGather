@@ -5,11 +5,11 @@ namespace Corp.ShanGong.FiberInstrument.IBizSpec
 {
     public interface IPhysicalCalculator
     {
-        List<SensorConfig> Configs
-        {
-            get;
-            set;
-        }
+//        List<SensorConfig> Configs
+//        {
+//            get;
+//            set;
+//        }
 
         /// <summary>
         ///     结构温度计算
@@ -36,5 +36,11 @@ namespace Corp.ShanGong.FiberInstrument.IBizSpec
         /// <param name="strainChanged"></param>
         /// <returns></returns>
         decimal? CalculateStructuralStress(SensorConfig config, decimal? waveLength, decimal? strainChanged);
+
+        /// <summary>
+        /// 位移数据
+        /// </summary>
+        /// <returns></returns>
+        decimal? CalculateDisplace(SensorConfig config, decimal? waveLength, decimal? waveLength2);
     }
 }

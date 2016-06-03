@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
@@ -8,9 +9,11 @@ using System.Windows.Forms;
 using Autofac;
 using Corp.ShanGong.FiberInstrument.BizCore;
 using Corp.ShanGong.FiberInstrument.Common;
+using Corp.ShanGong.FiberInstrument.DataPersistence;
 using Corp.ShanGong.FiberInstrument.IBizSpec;
-using Corp.ShanGong.FiberInstrument.Model;
+using Corp.ShanGong.FiberInstrument.Model.LocalSelf;
 using Corp.ShanGong.FiberInstrument.Setting;
+
 using Timer = System.Windows.Forms.Timer;
 
 namespace Corp.ShanGong.FiberInstrument.Presentation
@@ -19,11 +22,16 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
     {
         private static bool _running;
         private static Timer _renderTimer;
-        private static Timer _mockTimer;
-        private static readonly int _sendLocalPort = 9001;
-        private static readonly int _gatherInterval = 100; //采样频率 10HZ(0.1)
-        private readonly ConcurrentQueue<PhysicalQuantity> _toSaveQueue = new ConcurrentQueue<PhysicalQuantity>();
-        private readonly ConcurrentQueue<PhysicalQuantity> _toSendQueue = new ConcurrentQueue<PhysicalQuantity>();
+        private static readonly int _gatherInterval = 100; //页面刷新频率 10HZ(0.1)
+        private static ConcurrentQueue<PhysicalQuantity> _toRefreshQueue = new ConcurrentQueue<PhysicalQuantity>();
+        private static ConcurrentQueue<PhysicalQuantity> _toSaveQueue = new ConcurrentQueue<PhysicalQuantity>();
+        private static ConcurrentQueue<PhysicalQuantity> _toSendQueue = new ConcurrentQueue<PhysicalQuantity>();
+        private static ConcurrentQueue<PhysicalQuantity> _toDbQueue = new ConcurrentQueue<PhysicalQuantity>();
+        private static ConcurrentQueue<AdSpectraQuantity> _adQueue = new ConcurrentQueue<AdSpectraQuantity>();
+        private static bool _isDebugMode = false;
+        private static int _localSaveLoop = 1;
+        private static int _netSendLoop = 1;
+        private static int _dbSaveLoop = 1;
         private WaveFormViewData _waveViewData;
         private InstrumentOperation Operator;
 
@@ -31,11 +39,10 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         {
             InitializeComponent();
             ReadProfile();
-           
-            GlobalSetting.Instance.DataFileLocalPath = textBoxDataFileLocalPath.Text;
-            GlobalSetting.Instance.ChannelWay = Convert.ToInt32(comboBoxDeviceType.SelectedItem);
+            
             InitListView();
             InitWaveControl();
+            InitAdChart();
             InitTimer();
             _waveViewData = new WaveFormViewData();
         }
@@ -119,6 +126,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 groupBoxSave.Enabled = true;
                 buttonStart.Text = @"启动";
                 buttonConnect.Enabled = true;
+                numUDCollect.Enabled = true;
                 _running = !_running;
             }
             else
@@ -126,6 +134,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 groupBoxSave.Enabled = false;
                 buttonStart.Text = @"停止";
                 buttonConnect.Enabled = false;
+                numUDCollect.Enabled = false;
                 _running = !_running;
             }
         }
@@ -140,15 +149,19 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                     {
                         return;
                     }
-                    var result = await Operator.ReadLoop(AppSetting.Container.Resolve<IPhysicalCalculator>());
-                    if (result.Any())
+                    if (_isDebugMode)
                     {
-                        _waveViewData.PushChannelWaveData(result.Last());
-                        if (checkBoxSendData.Checked)
+                        var result = await Operator.ReadLoopAd();
+                        _adQueue.Enqueue(result);
+                    }
+                    else
+                    {
+                        var result = await Operator.ReadLoop(AppSetting.Container.Resolve<IPhysicalCalculator>());
+                        if (result.Any())
                         {
-                            _toSendQueue.Enqueue(result.Last());
+                            _toRefreshQueue.Enqueue(result.Last());
+                            //EnqueuData(result);                        
                         }
-                        _toSaveQueue.Enqueue(result.Last());
                     }
                 }
                 catch (BoundaryException bex)
@@ -173,21 +186,63 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             }
         }
 
+        private void EnqueuData(PhysicalQuantity result)
+        {
+            _waveViewData.PushChannelWaveData(result);
+            if (checkBoxEnableSaveLocal.Checked)
+            {
+                if (_localSaveLoop == Math.Max(1, SystemConfigLoader.SystemConfig.LocalDataInterval))
+                {
+                    _toSaveQueue.Enqueue(result);
+                    _localSaveLoop = 1;
+                }
+                else
+                {
+                    _localSaveLoop++;
+                }
+            }
+
+            if (checkBoxSendData.Checked)
+            {
+                if (_netSendLoop == Math.Max(1, SystemConfigLoader.SystemConfig.NetDataInterval))
+                {
+                    _toSendQueue.Enqueue(result);
+                    _netSendLoop = 1;
+                }
+                else
+                {
+                    _netSendLoop++;
+                }
+            }
+
+            if (checkBoxEnableSaveDB.Checked)
+            {
+                if (_dbSaveLoop == Math.Max(1, SystemConfigLoader.SystemConfig.DbDataInterval))
+                {
+                    _toDbQueue.Enqueue(result);
+                    _dbSaveLoop = 1;
+                }
+                else
+                {
+                    _dbSaveLoop++;
+                }
+            }
+        }
+
+        private void ClearQueueData()
+        {
+            _toRefreshQueue = new ConcurrentQueue<PhysicalQuantity>();
+            _toDbQueue = new ConcurrentQueue<PhysicalQuantity>();
+            _toSaveQueue = new ConcurrentQueue<PhysicalQuantity>();
+            _toSendQueue = new ConcurrentQueue<PhysicalQuantity>();
+            _adQueue = new ConcurrentQueue<AdSpectraQuantity>();
+        }
+
         private void InitTimer()
         {
             _renderTimer = new Timer();
             _renderTimer.Interval = _gatherInterval; 
             _renderTimer.Tick += _renderTimer_Tick;
-
-//            _mockTimer = new Timer();
-//            _mockTimer.Interval = 50;
-//            _mockTimer.Tick +=_mockTimer_Tick;
-//            _mockTimer.Start();
-        }
-
-        private void _mockTimer_Tick(object aSender, EventArgs aE)
-        {
-            ShowWaveForm();
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -216,96 +271,116 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 }
             }
         }
+
         private void _renderTimer_Tick(object aSender, EventArgs aE)
         {
-            //Task.Run(() =>
+            
+            AdSpectraQuantity adQuan;
+            if (_isDebugMode)
             {
-                //RecData().ContinueWith(task => task.Wait());
-
-                PhysicalQuantity sendQ;
-                if (_toSendQueue.TryDequeue(out sendQ))
+                if (_adQueue.TryDequeue(out adQuan))
+                {
+                    ControlRenderInvoke.SafeInvoke(plotViewAdChart, () => { FillAdPoint(adQuan); });
+                    Task.Run(() =>
+                        {
+                            var result = Operator.StartWithDebug().Result;
+                        }).ContinueWith(task => task.Wait()).Wait();
+                }
+                return;
+            }
+            PhysicalQuantity quan;
+            // 界面刷新    
+            if (_toRefreshQueue.TryDequeue(out quan))
+            {
+                EnqueuData(quan);
+                ControlRenderInvoke.SafeInvoke(listViewQuantity, () =>
                 {
                     try
                     {
-                        Task.Run(() => new Action(async () =>
+                        if (listViewQuantity.Items.Count > 0)
                         {
-                            var send = new SendQuantityPackage(_sendLocalPort, SendRemoteIp, SendRemotePort, sendQ);
-                            await send.SendData();
-                        })());
+                            for (var i = 0; i < GlobalStaticSetting.Instance.SensorCount; i++)
+                            {
+                                var item = listViewQuantity.Items[i];
+                                item.SubItems[0].Text = (i + 1).ToString();
+                                for (var j = 0; j < GlobalStaticSetting.Instance.ChannelWay; j++)
+                                {
+                                    var text = quan.ChannelValues[j].GratingValues[i].WaveLengthExtension.ToString();
+                                    item.SubItems[j + 1].Text = text;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (var i = 0; i < GlobalStaticSetting.Instance.SensorCount; i++)
+                            {
+                                var textArray = new string[GlobalStaticSetting.Instance.ChannelWay + 1];
+                                textArray[0] = "";
+                                for (var j = 0; j < GlobalStaticSetting.Instance.ChannelWay; j++)
+                                {
+                                    textArray[j + 1] =
+                                        quan.ChannelValues[j].GratingValues[i].WaveLengthExtension.ToString();
+                                }
+
+                                listViewQuantity.Items.Add(new ListViewItem(textArray, -1));
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
                         var bex = new BoundaryException(ex);
-                        AppendLog(bex.Message);
+                        AppendLog(bex.Display);
                     }
-                }
-                PhysicalQuantity quan;
+                });
+            }  
 
-                if (_toSaveQueue.TryDequeue(out quan))
+            //通过UDP 发送数据
+            PhysicalQuantity sendQ;
+            if (_toSendQueue.TryDequeue(out sendQ))
+            {
+                try
                 {
-                    if (checkBoxEnableSaveLocal.Checked)
+                    Task.Run(() => new Action(async () =>
                     {
-                        Task.Run(() =>
-                        {
-                            string[] dataArray;
-                            if (GlobalSetting.Instance.EnableSaveTestData)
-                            {
-                                dataArray = quan.ToTestDataString();
-                            }
-                            else
-                            {
-                                dataArray = quan.ToDataString();
-                            }
-                            for (var i = 0; i < dataArray.Length; i++)
-                            {
-                                StressDataFile.SaveByChannel(dataArray[i], i + 1);
-                            }
-                           
-                        });
-                    }
-                    
-                    ControlRenderInvoke.SafeInvoke(listViewQuantity, () =>
-                    {
-                        try
-                        {
-                            if (listViewQuantity.Items.Count > 0)
-                            {
-                                for (var i = 0; i < GlobalSetting.Instance.SensorCount; i++)
-                                {
-                                    var item = listViewQuantity.Items[i];
-                                    item.SubItems[0].Text = (i + 1).ToString();
-                                    for (var j = 0; j < GlobalSetting.Instance.ChannelWay; j++)
-                                    {
-                                        var text = quan.ChannelValues[j].GratingValues[i].WaveLengthExtension.ToString();
-                                        item.SubItems[j + 1].Text = text;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                for (var i = 0; i < GlobalSetting.Instance.SensorCount; i++)
-                                {
-                                    var textArray = new string[GlobalSetting.Instance.ChannelWay + 1];
-                                    textArray[0] = "";
-                                    for (var j = 0; j < GlobalSetting.Instance.ChannelWay; j++)
-                                    {
-                                        textArray[j + 1] =
-                                            quan.ChannelValues[j].GratingValues[i].WaveLengthExtension.ToString();
-                                    }
-
-                                    listViewQuantity.Items.Add(new ListViewItem(textArray, -1));
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            var bex = new BoundaryException(ex);
-                            AppendLog(bex.Display);
-                        }
-                    });
+                        var send = new SendQuantityPackage(SystemConfigLoader.SystemConfig.NetDataLocalPort, SendRemoteIp, SendRemotePort, sendQ);
+                        await send.SendData();
+                    })());
                 }
+                catch (Exception ex)
+                {
+                    var bex = new BoundaryException(ex);
+                    AppendLog(bex.Message);
+                }
+            }           
+
+            //本地文件保存
+            PhysicalQuantity saveQuan;
+            if (_toSaveQueue.TryDequeue(out saveQuan))
+            {                
+                Task.Run(() =>
+                {
+                    string[] dataArray;
+                    if (GlobalStaticSetting.Instance.EnableSaveTestData)
+                    {
+                        dataArray = saveQuan.ToTestDataString();
+                    }
+                    else
+                    {
+                        dataArray = saveQuan.ToPhysicalWaveDataString();
+                    }
+                    for (var i = 0; i < dataArray.Length; i++)
+                    {
+                        StressDataFile.SaveByChannel(dataArray[i], i + 1);
+                    }
+                });
             }
-            //);
+            PhysicalQuantity dbQuan;
+            // 数据库保存
+            if (_toDbQueue.TryDequeue(out dbQuan))
+            {
+                Task.Run(() => SendDataToDb.Save(dbQuan, AppSetting.Container.Resolve<IDataPersistence>()));
+            }
+                       
         }
 
         private void buttonConnect_Click(object sender, EventArgs e)
@@ -331,12 +406,24 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             try
             {
                 InitConnect();
+                WriteProfile();
                 if (!_running)
                 {
                     var result = new Tuple<bool, string>(false, "");
-                    Task.Run(() => result = Operator.Start().Result)
-                        .ContinueWith(task => task.Wait())
-                        .Wait();
+                   
+                    if (checkBoxDebugMode.Checked) // 光谱
+                    {
+                        _isDebugMode = true;
+                        Task.Run(() => 
+                        {
+                            result = Operator.StartWithDebug().Result;
+                        }).ContinueWith(task => task.Wait()).Wait();
+                    }
+                    else
+                    {
+                        _isDebugMode = false;
+                        Task.Run(() => result = Operator.Start().Result).ContinueWith(task => task.Wait()).Wait();
+                    }
                     if (!result.Item1)
                     {
                         AppendLog("启动失败！" + result.Item2);
@@ -352,10 +439,10 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                         AppendLog(string.Format("数据接收已经开始！   本地数据保存{0}开启！  数据发送{1}开启！",
                             checkBoxEnableSaveLocal.Checked ? "已" : "未", checkBoxSendData.Checked ? "已" : "未"));
                     }
+                    
                 }
                 else
                 {
-
                     _cancelSource.Cancel();
                     _cancelSource = null;
                     Task.Run(() => Operator.Stop().Result)
@@ -363,6 +450,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                         .Wait();
                     _renderTimer.Stop();
                     ResetControls();
+                    ClearQueueData();
                     AppendLog("已经停止接收！");
                 }
             }
@@ -380,7 +468,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 textBoxDataFileLocalPath.Text = dialog.SelectedPath;
-                GlobalSetting.Instance.DataFileLocalPath = textBoxDataFileLocalPath.Text;
+                SystemConfigLoader.SystemConfig.LocalRootPath = textBoxDataFileLocalPath.Text;
             }
         }
 
@@ -390,6 +478,8 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             this.labelSendPort.Visible = checkBoxSendData.Checked;
             this.textBoxSendRemoteIp.Visible = checkBoxSendData.Checked;
             this.textBoxSendRemotePort.Visible = checkBoxSendData.Checked;
+            this.labelSendInterval.Visible = checkBoxSendData.Checked;
+            this.numUDNetSendInterval.Visible = checkBoxSendData.Checked;
         }
 
         private void checkBoxEnableSaveLocal_CheckedChanged(object sender, EventArgs e)
@@ -397,13 +487,21 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             labelLocalPath.Visible = checkBoxEnableSaveLocal.Checked;
             textBoxDataFileLocalPath.Visible = checkBoxEnableSaveLocal.Checked;
             buttonBrowser.Visible = checkBoxEnableSaveLocal.Checked;
+            this.labelLocalSaveInterval.Visible = checkBoxEnableSaveLocal.Checked;
+            this.numUDLocalSaveInterval.Visible = checkBoxEnableSaveLocal.Checked;
         }
 
+        private void checkBoxEnableSaveDB_CheckedChanged(object sender, EventArgs e)
+        {
+            this.labelDbConfig.Visible = checkBoxEnableSaveDB.Checked;
+            this.textBoxDbConfigString.Visible = checkBoxEnableSaveDB.Checked;
+            this.labelDbSaveInterval.Visible = checkBoxEnableSaveDB.Checked;
+            this.numUDDbSaveInterval.Visible = checkBoxEnableSaveDB.Checked;
+        }
         private void ReadProfile()
         {
             textBoxLocalPort.Text = OperateIniFile.ReadIniData("basic", "LocalPort", "8001", "profile.ini");
-            var index = OperateIniFile.ReadIniData("basic", "ChannelWayIndex", "0", "profile.ini");
-            comboBoxDeviceType.SelectedIndex = string.IsNullOrEmpty(index) ? 0 : Convert.ToInt32(index);
+            
             checkBoxEnableSaveLocal.Checked = (OperateIniFile.ReadIniData("save", "EnableLocalSave", "0", "profile.ini") != "0");
             textBoxDataFileLocalPath.Text = OperateIniFile.ReadIniData("save", "LocalPath", "D:\\", "profile.ini");
 
@@ -412,20 +510,63 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             textBoxSendRemotePort.Text = OperateIniFile.ReadIniData("save", "SendRemotePort", "9000", "profile.ini");
 
             checkBoxEnableSaveDB.Checked = (OperateIniFile.ReadIniData("save", "EnableSaveDB", "0", "profile.ini") != "0");
+
+
+            SystemPreference sysPreference = SystemConfigLoader.SystemConfig;
+            if (sysPreference != null)
+            {
+                textBoxRemote.Text = sysPreference.HostIp;
+                checkBoxEnableSaveDB.Checked = sysPreference.EnableDbData;
+                checkBoxEnableSaveLocal.Checked = sysPreference.EnableLocalData;
+                checkBoxSendData.Checked = sysPreference.EnableNetData;
+                textBoxDataFileLocalPath.Text = sysPreference.LocalRootPath;
+                textBoxRemotePort.Text = sysPreference.HostPort.ToString();
+                textBoxLocalPort.Text = sysPreference.LocalPort.ToString();
+                textBoxSendRemoteIp.Text = sysPreference.NetDataRemoteIp;
+                textBoxSendRemotePort.Text = sysPreference.NetDataRemotePort.ToString();
+
+                textBoxDbConfigString.Text = sysPreference.DbConfigString;
+                numUDCollect.Value = Math.Max(1, sysPreference.CollectInterval);
+                numUDLocalSaveInterval.Value = Math.Max(1, sysPreference.LocalDataInterval);
+                numUDNetSendInterval.Value = Math.Max(1, sysPreference.NetDataInterval);
+                numUDDbSaveInterval.Value = Math.Max(1, sysPreference.DbDataInterval);
+            }
         }
 
         private void WriteProfile()
         {
-            OperateIniFile.WriteIniData("basic", "LocalPort", textBoxLocalPort.Text.Trim(), "profile.ini");
-            OperateIniFile.WriteIniData("basic", "ChannelWayIndex", comboBoxDeviceType.SelectedIndex.ToString(), "profile.ini");
-
+            OperateIniFile.WriteIniData("basic", "LocalPort", textBoxLocalPort.Text.Trim(), "profile.ini");        
             OperateIniFile.WriteIniData("save", "EnableLocalSave", checkBoxEnableSaveLocal.Checked ? "1" : "0","profile.ini");
             OperateIniFile.WriteIniData("save", "LocalPath", textBoxDataFileLocalPath.Text, "profile.ini");
-
             OperateIniFile.WriteIniData("save", "EnableSendData", checkBoxSendData.Checked ? "1" : "0", "profile.ini");
             OperateIniFile.WriteIniData("save", "SendRemoteIp", textBoxSendRemoteIp.Text, "profile.ini");
             OperateIniFile.WriteIniData("save", "SendRemotePort", textBoxSendRemotePort.Text, "profile.ini");
             OperateIniFile.WriteIniData("save", "EnableSaveDB", checkBoxEnableSaveDB.Checked ? "1" : "0", "profile.ini");
+
+            SystemPreference sysPreference = SystemConfigLoader.SystemConfig;
+            if (sysPreference != null)
+            {
+                //sysPreference.HostIp = textBoxRemote.Text;
+                sysPreference.EnableDbData = checkBoxEnableSaveDB.Checked;
+                sysPreference.EnableLocalData = checkBoxEnableSaveLocal.Checked;
+
+                sysPreference.EnableNetData = checkBoxSendData.Checked;
+                sysPreference.LocalRootPath = textBoxDataFileLocalPath.Text;
+                sysPreference.HostPort = string.IsNullOrEmpty(textBoxRemotePort.Text) ? 0 : Convert.ToInt32(textBoxRemotePort.Text);
+                sysPreference.LocalPort = string.IsNullOrEmpty(textBoxLocalPort.Text) ? 0 : Convert.ToInt32(textBoxLocalPort.Text);
+                sysPreference.NetDataRemoteIp = textBoxSendRemoteIp.Text;
+                sysPreference.NetDataRemotePort = string.IsNullOrEmpty(textBoxSendRemotePort.Text)
+                    ? 0 : Convert.ToInt32(textBoxSendRemotePort.Text);
+              
+                sysPreference.DbConfigString = textBoxDbConfigString.Text;
+                sysPreference.CollectInterval = (int)numUDCollect.Value;
+                sysPreference.LocalDataInterval = (int)numUDLocalSaveInterval.Value;
+                sysPreference.NetDataInterval = (int)numUDNetSendInterval.Value;
+                sysPreference.DbDataInterval = (int)numUDDbSaveInterval.Value;
+
+
+                SystemConfigLoader.SystemConfig = sysPreference;
+            }
         }
 
         private void AppendLog(string[] append)
@@ -445,12 +586,29 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             textBoxLog.ScrollToCaret();
         }
 
-        private void comboBoxDeviceType_SelectedIndexChanged(object sender, EventArgs e)
+        private void numUD_ValueChanged(object sender, EventArgs e)
         {
-            GlobalSetting.Instance.ChannelWay = Convert.ToInt32(comboBoxDeviceType.SelectedItem);
-            InitListView();
+            NumericUpDown num = sender as NumericUpDown;
+            num.Value = ResetNumValue(num.Value, num.Minimum, num.Maximum, num.Increment);
+           
         }
 
-      
+        private decimal ResetNumValue(decimal @value, decimal min, decimal max, decimal increment)
+        {
+            if (@value > min && @value < max)
+            {
+                if (@value % increment != 0)
+                {
+                    @value = (@value % increment) * increment;
+                }
+            }
+            return @value;
+        }
+
+        private void checkBoxDebugMode_CheckedChanged(object sender, EventArgs e)
+        {
+            this.comboBoxChannel.Visible = checkBoxDebugMode.Checked;
+        }
+
     }
 }

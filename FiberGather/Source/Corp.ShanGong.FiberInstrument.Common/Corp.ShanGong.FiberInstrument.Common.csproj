@@ -41,7 +41,7 @@
   <ItemGroup>
     <Compile Include="BoundaryException.cs" />
     <Compile Include="BuildInTypeExtension.cs" />
-    <Compile Include="ConfigInitialize.cs" />
+    <Compile Include="DataRowExtension.cs" />
     <Compile Include="HexExtension.cs" />
     <Compile Include="ObjectInitializeExtension.cs" />
     <Compile Include="OperateIniFile.cs" />
