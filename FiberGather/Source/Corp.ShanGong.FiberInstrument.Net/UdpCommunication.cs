@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Corp.ShanGong.FiberInstrument.Net
@@ -23,6 +24,7 @@ namespace Corp.ShanGong.FiberInstrument.Net
             Local = new IPEndPoint(address, localPort);
             RecvChanel = new UdpClient(Local);
             RecvChanel.Client.ReceiveBufferSize = 1024*200;
+            RecvChanel.Client.ReceiveTimeout = 1000;
             //RecvChanel.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
             //SendChanel = new UdpClient(Local);
             SendChanel = RecvChanel;
@@ -76,12 +78,20 @@ namespace Corp.ShanGong.FiberInstrument.Net
 
         public async Task<byte[]> ReceiveDataAsync()
         {
-            if (RecvChanel == null)
+            if (RecvChanel == null || RecvChanel.Client == null)
             {
                 throw new SocketException();
             }
-            var result = await RecvChanel.ReceiveAsync();
-            return result.Buffer;
+            try
+            {
+                var result = await RecvChanel.ReceiveAsync();
+                return result.Buffer;
+            }
+            catch(ObjectDisposedException oex)
+            {
+                return null;
+            }
+            
         }
 
         public void Reset()
@@ -90,6 +100,7 @@ namespace Corp.ShanGong.FiberInstrument.Net
             {
                 SendChanel.Close();
                 SendChanel = null;
+                RecvChanel = null;
             }
         }
     }

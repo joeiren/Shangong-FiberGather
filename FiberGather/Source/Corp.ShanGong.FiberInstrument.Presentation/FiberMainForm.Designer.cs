@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.listViewQuantity = new System.Windows.Forms.ListView();
             this.groupBoxSetting = new System.Windows.Forms.GroupBox();
             this.comboBoxChannel = new System.Windows.Forms.ComboBox();
             this.checkBoxDebugMode = new System.Windows.Forms.CheckBox();
@@ -63,35 +61,21 @@
             this.textBoxDataFileLocalPath = new System.Windows.Forms.TextBox();
             this.labelLocalPath = new System.Windows.Forms.Label();
             this.textBoxLog = new System.Windows.Forms.TextBox();
-            this.tabControlMonitor = new System.Windows.Forms.TabControl();
-            this.tabPageWave = new System.Windows.Forms.TabPage();
-            this.tabPageWaveChart = new System.Windows.Forms.TabPage();
-            this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
             this.tabPageAdChart = new System.Windows.Forms.TabPage();
             this.plotViewAdChart = new OxyPlot.WindowsForms.PlotView();
+            this.tabPageWave = new System.Windows.Forms.TabPage();
+            this.listViewQuantity = new System.Windows.Forms.ListView();
+            this.tabControlMonitor = new System.Windows.Forms.TabControl();
             this.groupBoxSetting.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numUDCollect)).BeginInit();
             this.groupBoxSave.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numUDDbSaveInterval)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numUDNetSendInterval)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numUDLocalSaveInterval)).BeginInit();
-            this.tabControlMonitor.SuspendLayout();
-            this.tabPageWave.SuspendLayout();
-            this.tabPageWaveChart.SuspendLayout();
             this.tabPageAdChart.SuspendLayout();
+            this.tabPageWave.SuspendLayout();
+            this.tabControlMonitor.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // listViewQuantity
-            // 
-            this.listViewQuantity.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewQuantity.GridLines = true;
-            this.listViewQuantity.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewQuantity.Location = new System.Drawing.Point(3, 3);
-            this.listViewQuantity.Name = "listViewQuantity";
-            this.listViewQuantity.Size = new System.Drawing.Size(1160, 442);
-            this.listViewQuantity.TabIndex = 30;
-            this.listViewQuantity.UseCompatibleStateImageBehavior = false;
-            this.listViewQuantity.View = System.Windows.Forms.View.Details;
             // 
             // groupBoxSetting
             // 
@@ -119,7 +103,7 @@
             // comboBoxChannel
             // 
             this.comboBoxChannel.FormattingEnabled = true;
-            this.comboBoxChannel.Location = new System.Drawing.Point(685, 17);
+            this.comboBoxChannel.Location = new System.Drawing.Point(716, 17);
             this.comboBoxChannel.Name = "comboBoxChannel";
             this.comboBoxChannel.Size = new System.Drawing.Size(80, 20);
             this.comboBoxChannel.TabIndex = 23;
@@ -131,9 +115,9 @@
             this.checkBoxDebugMode.AutoSize = true;
             this.checkBoxDebugMode.Location = new System.Drawing.Point(614, 21);
             this.checkBoxDebugMode.Name = "checkBoxDebugMode";
-            this.checkBoxDebugMode.Size = new System.Drawing.Size(72, 16);
+            this.checkBoxDebugMode.Size = new System.Drawing.Size(96, 16);
             this.checkBoxDebugMode.TabIndex = 9;
-            this.checkBoxDebugMode.Text = "调试模式";
+            this.checkBoxDebugMode.Text = "光谱调试模式";
             this.checkBoxDebugMode.UseVisualStyleBackColor = true;
             this.checkBoxDebugMode.CheckedChanged += new System.EventHandler(this.checkBoxDebugMode_CheckedChanged);
             // 
@@ -526,57 +510,6 @@
             this.textBoxLog.Size = new System.Drawing.Size(1170, 42);
             this.textBoxLog.TabIndex = 31;
             // 
-            // tabControlMonitor
-            // 
-            this.tabControlMonitor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControlMonitor.Controls.Add(this.tabPageWave);
-            this.tabControlMonitor.Controls.Add(this.tabPageWaveChart);
-            this.tabControlMonitor.Controls.Add(this.tabPageAdChart);
-            this.tabControlMonitor.Location = new System.Drawing.Point(8, 207);
-            this.tabControlMonitor.Name = "tabControlMonitor";
-            this.tabControlMonitor.SelectedIndex = 0;
-            this.tabControlMonitor.Size = new System.Drawing.Size(1174, 474);
-            this.tabControlMonitor.TabIndex = 32;
-            // 
-            // tabPageWave
-            // 
-            this.tabPageWave.Controls.Add(this.listViewQuantity);
-            this.tabPageWave.Location = new System.Drawing.Point(4, 22);
-            this.tabPageWave.Name = "tabPageWave";
-            this.tabPageWave.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWave.Size = new System.Drawing.Size(1166, 448);
-            this.tabPageWave.TabIndex = 0;
-            this.tabPageWave.Text = "波长值";
-            this.tabPageWave.UseVisualStyleBackColor = true;
-            // 
-            // tabPageWaveChart
-            // 
-            this.tabPageWaveChart.Controls.Add(this.zedGraphControl1);
-            this.tabPageWaveChart.Location = new System.Drawing.Point(4, 22);
-            this.tabPageWaveChart.Name = "tabPageWaveChart";
-            this.tabPageWaveChart.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWaveChart.Size = new System.Drawing.Size(1166, 448);
-            this.tabPageWaveChart.TabIndex = 1;
-            this.tabPageWaveChart.Text = "波长图";
-            this.tabPageWaveChart.UseVisualStyleBackColor = true;
-            // 
-            // zedGraphControl1
-            // 
-            this.zedGraphControl1.Location = new System.Drawing.Point(4, 6);
-            this.zedGraphControl1.Name = "zedGraphControl1";
-            this.zedGraphControl1.ScrollGrace = 0D;
-            this.zedGraphControl1.ScrollMaxX = 0D;
-            this.zedGraphControl1.ScrollMaxY = 0D;
-            this.zedGraphControl1.ScrollMaxY2 = 0D;
-            this.zedGraphControl1.ScrollMinX = 0D;
-            this.zedGraphControl1.ScrollMinY = 0D;
-            this.zedGraphControl1.ScrollMinY2 = 0D;
-            this.zedGraphControl1.Size = new System.Drawing.Size(988, 388);
-            this.zedGraphControl1.TabIndex = 0;
-            this.zedGraphControl1.UseExtendedPrintDialog = true;
-            // 
             // tabPageAdChart
             // 
             this.tabPageAdChart.Controls.Add(this.plotViewAdChart);
@@ -600,6 +533,42 @@
             this.plotViewAdChart.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
             this.plotViewAdChart.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
             // 
+            // tabPageWave
+            // 
+            this.tabPageWave.Controls.Add(this.listViewQuantity);
+            this.tabPageWave.Location = new System.Drawing.Point(4, 22);
+            this.tabPageWave.Name = "tabPageWave";
+            this.tabPageWave.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageWave.Size = new System.Drawing.Size(1166, 448);
+            this.tabPageWave.TabIndex = 0;
+            this.tabPageWave.Text = "波长值";
+            this.tabPageWave.UseVisualStyleBackColor = true;
+            // 
+            // listViewQuantity
+            // 
+            this.listViewQuantity.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewQuantity.GridLines = true;
+            this.listViewQuantity.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listViewQuantity.Location = new System.Drawing.Point(3, 3);
+            this.listViewQuantity.Name = "listViewQuantity";
+            this.listViewQuantity.Size = new System.Drawing.Size(1160, 442);
+            this.listViewQuantity.TabIndex = 30;
+            this.listViewQuantity.UseCompatibleStateImageBehavior = false;
+            this.listViewQuantity.View = System.Windows.Forms.View.Details;
+            // 
+            // tabControlMonitor
+            // 
+            this.tabControlMonitor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControlMonitor.Controls.Add(this.tabPageWave);
+            this.tabControlMonitor.Controls.Add(this.tabPageAdChart);
+            this.tabControlMonitor.Location = new System.Drawing.Point(8, 207);
+            this.tabControlMonitor.Name = "tabControlMonitor";
+            this.tabControlMonitor.SelectedIndex = 0;
+            this.tabControlMonitor.Size = new System.Drawing.Size(1174, 474);
+            this.tabControlMonitor.TabIndex = 32;
+            // 
             // FiberMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -621,10 +590,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.numUDDbSaveInterval)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numUDNetSendInterval)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numUDLocalSaveInterval)).EndInit();
-            this.tabControlMonitor.ResumeLayout(false);
-            this.tabPageWave.ResumeLayout(false);
-            this.tabPageWaveChart.ResumeLayout(false);
             this.tabPageAdChart.ResumeLayout(false);
+            this.tabPageWave.ResumeLayout(false);
+            this.tabControlMonitor.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -632,8 +600,7 @@
 
         #endregion
 
-        private System.Windows.Forms.ListView listViewQuantity;
-//        private System.Windows.Forms.ColumnHeader columnHeader0;
+        //        private System.Windows.Forms.ColumnHeader columnHeader0;
 //        private System.Windows.Forms.ColumnHeader columnHeader1;
 //        private System.Windows.Forms.ColumnHeader columnHeader2;
 //        private System.Windows.Forms.ColumnHeader columnHeader3;
@@ -663,10 +630,6 @@
         private System.Windows.Forms.Label labelSendIp;
         private System.Windows.Forms.CheckBox checkBoxSendData;
         private System.Windows.Forms.TextBox textBoxLog;
-        private System.Windows.Forms.TabControl tabControlMonitor;
-        private System.Windows.Forms.TabPage tabPageWave;
-        private System.Windows.Forms.TabPage tabPageWaveChart;
-        private ZedGraph.ZedGraphControl zedGraphControl1;
         private System.Windows.Forms.Label labelCollectInterval;
         private System.Windows.Forms.NumericUpDown numUDCollect;
         private System.Windows.Forms.Label labelDbSaveInterval;
@@ -678,10 +641,13 @@
         private System.Windows.Forms.Label labelLocalSaveInterval;
         private System.Windows.Forms.NumericUpDown numUDLocalSaveInterval;
         private System.Windows.Forms.CheckBox checkBoxDebugMode;
-        private System.Windows.Forms.TabPage tabPageAdChart;
-//        private System.Windows.Forms.ColumnHeader columnHeader1;
-        private OxyPlot.WindowsForms.PlotView plotViewAdChart;
+        //        private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ComboBox comboBoxChannel;
+        private System.Windows.Forms.TabPage tabPageAdChart;
+        private OxyPlot.WindowsForms.PlotView plotViewAdChart;
+        private System.Windows.Forms.TabPage tabPageWave;
+        private System.Windows.Forms.ListView listViewQuantity;
+        private System.Windows.Forms.TabControl tabControlMonitor;
 
     }
 }

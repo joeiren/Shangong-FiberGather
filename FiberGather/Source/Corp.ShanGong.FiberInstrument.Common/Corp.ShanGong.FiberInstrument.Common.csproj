@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncCancelExtension.cs" />
     <Compile Include="BoundaryException.cs" />
     <Compile Include="BuildInTypeExtension.cs" />
     <Compile Include="DataRowExtension.cs" />

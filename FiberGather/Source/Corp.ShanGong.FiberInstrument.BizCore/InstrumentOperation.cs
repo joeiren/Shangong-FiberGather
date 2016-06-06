@@ -52,20 +52,23 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             {
                 return new Tuple<bool, string>(false, "The object Communication is null!");
             }
-//
-//            string hexstr = "1020060300";  // 停止
-//            var senddata = hexstr.ToHexByte();
-//            var len = await Communication.SendDataAsync(senddata, senddata.Length);
+
+            //string hexstop = "1020060300";  // 停止
+            //var stopdata = hexstop.ToHexByte();
+            //var len = await Communication.SendDataAsync(stopdata, stopdata.Length);
+
+            //Thread.Sleep(TimeSpan.FromMilliseconds(500));
+
 
             try
             {
                 var hexstr = "1004000000";
                 var senddata = hexstr.ToHexByte();
-                var len = await Communication.SendDataAsync(senddata, senddata.Length);
+                await Communication.SendDataAsync(senddata, senddata.Length);
 
                 hexstr = "1005000200";
                 senddata = hexstr.ToHexByte();
-                len = await Communication.SendDataAsync(senddata, senddata.Length);
+                var len = await Communication.SendDataAsync(senddata, senddata.Length);
 
                 hexstr = "100613ec00";
                 senddata = hexstr.ToHexByte();
@@ -98,6 +101,12 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
 
             try
             {
+                //string hexstop = "1020060300";  // 停止
+                //var stopdata = hexstop.ToHexByte();
+                //await Communication.SendDataAsync(stopdata, stopdata.Length);
+
+                //Thread.Sleep(TimeSpan.FromMilliseconds(1000));
+
                 var hexstr = "1004000000";
                 var senddata = hexstr.ToHexByte();
                 var len = await Communication.SendDataAsync(senddata, senddata.Length);
@@ -131,14 +140,18 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
             var len = await Communication.SendDataAsync(senddata, senddata.Length);
             var avilable = Communication.RecvChanel.Client.Available;
             while (avilable != 0)
-            {
+            {   
                 await Communication.ReceiveDataAsync();
                 avilable = Communication.RecvChanel.Client.Available;
             }
             return true;
         }
 
-
+        public CancellationToken ReceiveToken
+        {
+            get;
+            set;
+        }
 
         public async Task<List<PhysicalQuantity>> ReadLoop(IPhysicalCalculator calc)
         {
@@ -150,7 +163,16 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
                 var i = 0;
                 while (i < breakCount)
                 {
-                    var result = await Communication.ReceiveDataAsync();
+                    if (ReceiveToken.IsCancellationRequested)
+                    {
+                        return null;
+                    }
+                    var result = await ReceiveDataHandle();                             
+
+                    if (result == null)
+                    {
+                        return null;
+                    }
                     if (result.Length < 530)  // 
                     {
                         continue;
@@ -181,9 +203,13 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
 
         public async Task<AdSpectraQuantity> ReadLoopAd()
         {
-            var adData = AdDataRead();
+            var adData = await AdDataRead();
+            if (adData == null)
+            {
+                return null;
+            }
             var message = new AdMessage();
-            message.Parse(adData.Result);
+            message.Parse(adData);
             var adQuantity = AdSpectraQuantity.LoadForm(message);
             return adQuantity;
         }
@@ -191,13 +217,24 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
         public async Task<byte[]> AdDataRead()
         {
              int _offset = 0;
-            byte[]  _adData = new byte[AdSpectraQuantity.MESSAGE_LENGTH];
+            
             _offset -= FrequencyMessage.MESSAGE_LENGTH;
-            var result = await Communication.ReceiveDataAsync();
-
+            if (ReceiveToken.IsCancellationRequested)
+            {
+                return null;
+            }
+            var result = await ReceiveDataHandle();
+            if(result == null)
+            {
+                return null;
+            }
+            byte[] _adData = new byte[AdSpectraQuantity.MESSAGE_LENGTH];
             while (_offset < AdSpectraQuantity.MESSAGE_LENGTH)
             {
-                if (_offset + result.Length > 0)
+                var toExcept = _offset + result.Length ;
+                if (toExcept > 0 
+                    && toExcept <= AdSpectraQuantity.MESSAGE_LENGTH
+                    )
                 {
                     if (_offset < 0)
                     {
@@ -213,9 +250,35 @@ namespace Corp.ShanGong.FiberInstrument.BizCore
                 {
                     break;
                 }
-                result = await Communication.ReceiveDataAsync();
+                if (ReceiveToken.IsCancellationRequested)
+                {
+                    return null;
+                }
+                result = await ReceiveDataHandle();
+                if (result == null)
+                {
+                    return null;
+                }
             }
             return _adData;
+        }
+
+        public async Task<byte[]>  ReceiveDataHandle()
+        {
+            var task = Communication.ReceiveDataAsync();
+            byte[] result;
+            try
+            {
+                result = await task.WithCancelation(ReceiveToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                if (!task.IsCompleted)
+                {
+                }
+                return null;
+            }
+            return result;
         }
     }
 }

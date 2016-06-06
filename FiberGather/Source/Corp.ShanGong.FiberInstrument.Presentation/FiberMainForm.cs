@@ -22,7 +22,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
     {
         private static bool _running;
         private static Timer _renderTimer;
-        private static readonly int _gatherInterval = 100; //页面刷新频率 10HZ(0.1)
+        private static readonly int _gatherInterval = 10; //页面刷新频率 10HZ(0.1)
         private static ConcurrentQueue<PhysicalQuantity> _toRefreshQueue = new ConcurrentQueue<PhysicalQuantity>();
         private static ConcurrentQueue<PhysicalQuantity> _toSaveQueue = new ConcurrentQueue<PhysicalQuantity>();
         private static ConcurrentQueue<PhysicalQuantity> _toSendQueue = new ConcurrentQueue<PhysicalQuantity>();
@@ -33,7 +33,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         private static int _netSendLoop = 1;
         private static int _dbSaveLoop = 1;
         private WaveFormViewData _waveViewData;
-        private InstrumentOperation Operator;
+        private InstrumentOperation _operator;
 
         public FiberMainForm()
         {
@@ -41,7 +41,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             ReadProfile();
             
             InitListView();
-            InitWaveControl();
+           
             InitAdChart();
             InitTimer();
             _waveViewData = new WaveFormViewData();
@@ -96,19 +96,19 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         {
             try
             {
-                if (Operator == null)
+                if (_operator == null)
                 {
-                    Operator = new InstrumentOperation(LocalPort, RemoteIp, RemotePort);
+                    _operator = new InstrumentOperation(LocalPort, RemoteIp, RemotePort);
                 }
                 else
                 {
-                    if (Operator.Communication.Local.Port != LocalPort ||
-                        Operator.Communication.Remote.Port != RemotePort ||
-                        Operator.Communication.Remote.Address.ToString() != RemoteIp)
+                    if (_operator.Communication.Local.Port != LocalPort ||
+                        _operator.Communication.Remote.Port != RemotePort ||
+                        _operator.Communication.Remote.Address.ToString() != RemoteIp)
                     {
-                        Operator.Communication.Reset();
-                        Operator = null;
-                        Operator = new InstrumentOperation(LocalPort, RemoteIp, RemotePort);
+                        _operator.Communication.Reset();
+                        _operator = null;
+                        _operator = new InstrumentOperation(LocalPort, RemoteIp, RemotePort);
                     }
                 }
             }
@@ -116,6 +116,14 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             {
                 var bex = new BoundaryException("初始化UDP通道失败！", ex);
                 AppendLog(bex.Display);
+            }
+        }
+
+        private void ResetConnect()
+        {
+            if (_operator != null)
+            {
+                _operator.Communication.Reset();
             }
         }
 
@@ -151,13 +159,16 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                     }
                     if (_isDebugMode)
                     {
-                        var result = await Operator.ReadLoopAd();
-                        _adQueue.Enqueue(result);
+                        var result = await _operator.ReadLoopAd();
+                        if (result != null)
+                        {
+                            _adQueue.Enqueue(result);
+                        }                        
                     }
                     else
                     {
-                        var result = await Operator.ReadLoop(AppSetting.Container.Resolve<IPhysicalCalculator>());
-                        if (result.Any())
+                        var result = await _operator.ReadLoop(AppSetting.Container.Resolve<IPhysicalCalculator>());
+                        if (result != null && result.Any())
                         {
                             _toRefreshQueue.Enqueue(result.Last());
                             //EnqueuData(result);                        
@@ -166,7 +177,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 }
                 catch (BoundaryException bex)
                 {
-                    if (token.CanBeCanceled)
+                    if (!token.IsCancellationRequested)
                     {
                         _cancelSource.Cancel();
                         bex.Display += "\t数据接收已退出";
@@ -176,7 +187,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 catch (Exception ex)
                 {
                     var bex = new BoundaryException(ex);
-                    if (token.CanBeCanceled)
+                    if (!token.IsCancellationRequested)
                     {
                         _cancelSource.Cancel();
                         bex.Display += "\t数据接收已退出";
@@ -254,27 +265,35 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 _renderTimer.Stop();
             }
 
-            if (_running && Operator != null)
+            if (_running && _operator != null)
             {
-                Task.Run(() => Operator.Stop());
+                Task.Run(() => _operator.Stop());
             }
         }
         CancellationTokenSource _cancelSource = new CancellationTokenSource();
         private async Task NetRecData(CancellationToken token)
         {
-            while (true)
+            try
             {
-                await RecData(token).ContinueWith(task => task.Wait(token));
-                if (token.IsCancellationRequested)
-                {
-                    break;
+                while (true)
+                {                    
+                    await RecData(token).ContinueWith(task => task.Wait(token));
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+
+            }
+            
         }
 
         private void _renderTimer_Tick(object aSender, EventArgs aE)
         {
-            
+            // 光谱
             AdSpectraQuantity adQuan;
             if (_isDebugMode)
             {
@@ -282,8 +301,8 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 {
                     ControlRenderInvoke.SafeInvoke(plotViewAdChart, () => { FillAdPoint(adQuan); });
                     Task.Run(() =>
-                        {
-                            var result = Operator.StartWithDebug().Result;
+                        {                            
+                            var result = _operator.StartWithDebug().Result;
                         }).ContinueWith(task => task.Wait()).Wait();
                 }
                 return;
@@ -305,7 +324,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                                 item.SubItems[0].Text = (i + 1).ToString();
                                 for (var j = 0; j < GlobalStaticSetting.Instance.ChannelWay; j++)
                                 {
-                                    var text = quan.ChannelValues[j].GratingValues[i].WaveLengthExtension.ToString();
+                                    var text = quan.OrignalVal.SensorFrequencyDic[j][i].WaveLengthExtension.ToString();
                                     item.SubItems[j + 1].Text = text;
                                 }
                             }
@@ -319,7 +338,8 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                                 for (var j = 0; j < GlobalStaticSetting.Instance.ChannelWay; j++)
                                 {
                                     textArray[j + 1] =
-                                        quan.ChannelValues[j].GratingValues[i].WaveLengthExtension.ToString();
+                                       // quan.ChannelValues[j].GratingValues[i].WaveLengthExtension.ToString();
+                                       quan.OrignalVal.SensorFrequencyDic[j][i].WaveLengthExtension.ToString();
                                 }
 
                                 listViewQuantity.Items.Add(new ListViewItem(textArray, -1));
@@ -389,7 +409,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
             {
                 InitConnect();
                 var result = false;
-                Task.Run(() => result = Operator.TestConnection().Result)
+                Task.Run(() => result = _operator.TestConnection().Result)
                     .ContinueWith(task => task.Wait())
                     .Wait();
                 AppendLog(result ? "连接成功" : "连接失败");
@@ -414,15 +434,16 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                     if (checkBoxDebugMode.Checked) // 光谱
                     {
                         _isDebugMode = true;
+                        _renderTimer.Interval =500; // 刷新频率
                         Task.Run(() => 
                         {
-                            result = Operator.StartWithDebug().Result;
+                            result = _operator.StartWithDebug().Result;
                         }).ContinueWith(task => task.Wait()).Wait();
                     }
                     else
                     {
                         _isDebugMode = false;
-                        Task.Run(() => result = Operator.Start().Result).ContinueWith(task => task.Wait()).Wait();
+                        Task.Run(() => result = _operator.Start().Result).ContinueWith(task => task.Wait()).Wait();
                     }
                     if (!result.Item1)
                     {
@@ -434,6 +455,7 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                         AppendLog("启动成功！");
                         _renderTimer.Start();
                         _cancelSource = new CancellationTokenSource();
+                        _operator.ReceiveToken = _cancelSource.Token;
                         Task.Run(() => NetRecData(_cancelSource.Token));
 
                         AppendLog(string.Format("数据接收已经开始！   本地数据保存{0}开启！  数据发送{1}开启！",
@@ -443,13 +465,14 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
                 }
                 else
                 {
+                    ResetControls();
                     _cancelSource.Cancel();
                     _cancelSource = null;
-                    Task.Run(() => Operator.Stop().Result)
+                    Task.Run(() => _operator.Stop().Result)
                         .ContinueWith(task => task.Wait())
                         .Wait();
-                    _renderTimer.Stop();
-                    ResetControls();
+                    _renderTimer.Stop();                    
+                    ResetConnection();
                     ClearQueueData();
                     AppendLog("已经停止接收！");
                 }
@@ -500,18 +523,6 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
         }
         private void ReadProfile()
         {
-            textBoxLocalPort.Text = OperateIniFile.ReadIniData("basic", "LocalPort", "8001", "profile.ini");
-            
-            checkBoxEnableSaveLocal.Checked = (OperateIniFile.ReadIniData("save", "EnableLocalSave", "0", "profile.ini") != "0");
-            textBoxDataFileLocalPath.Text = OperateIniFile.ReadIniData("save", "LocalPath", "D:\\", "profile.ini");
-
-            checkBoxSendData.Checked = (OperateIniFile.ReadIniData("save", "EnableSendData", "0", "profile.ini") != "0");
-            textBoxSendRemoteIp.Text = OperateIniFile.ReadIniData("save", "SendRemoteIp", "192.168.0.19", "profile.ini");
-            textBoxSendRemotePort.Text = OperateIniFile.ReadIniData("save", "SendRemotePort", "9000", "profile.ini");
-
-            checkBoxEnableSaveDB.Checked = (OperateIniFile.ReadIniData("save", "EnableSaveDB", "0", "profile.ini") != "0");
-
-
             SystemPreference sysPreference = SystemConfigLoader.SystemConfig;
             if (sysPreference != null)
             {
@@ -535,14 +546,6 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
 
         private void WriteProfile()
         {
-            OperateIniFile.WriteIniData("basic", "LocalPort", textBoxLocalPort.Text.Trim(), "profile.ini");        
-            OperateIniFile.WriteIniData("save", "EnableLocalSave", checkBoxEnableSaveLocal.Checked ? "1" : "0","profile.ini");
-            OperateIniFile.WriteIniData("save", "LocalPath", textBoxDataFileLocalPath.Text, "profile.ini");
-            OperateIniFile.WriteIniData("save", "EnableSendData", checkBoxSendData.Checked ? "1" : "0", "profile.ini");
-            OperateIniFile.WriteIniData("save", "SendRemoteIp", textBoxSendRemoteIp.Text, "profile.ini");
-            OperateIniFile.WriteIniData("save", "SendRemotePort", textBoxSendRemotePort.Text, "profile.ini");
-            OperateIniFile.WriteIniData("save", "EnableSaveDB", checkBoxEnableSaveDB.Checked ? "1" : "0", "profile.ini");
-
             SystemPreference sysPreference = SystemConfigLoader.SystemConfig;
             if (sysPreference != null)
             {
@@ -607,7 +610,16 @@ namespace Corp.ShanGong.FiberInstrument.Presentation
 
         private void checkBoxDebugMode_CheckedChanged(object sender, EventArgs e)
         {
-            this.comboBoxChannel.Visible = checkBoxDebugMode.Checked;
+            this.comboBoxChannel.Visible = checkBoxDebugMode.Checked;            
+        }
+
+        private void ResetConnection()
+        {
+            if (_operator != null)
+            {
+                _operator.Communication.Reset();
+                _operator = null;
+            }
         }
 
     }
